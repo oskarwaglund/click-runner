@@ -6,15 +6,17 @@ public class Point {
 	double x, y;
 	
 	Wall wall;
+	int wallIndex;
 	
 	public Point(double x, double y) {
-		this(x, y, null);
+		this(x, y, null, -1);
 	}
 	
-	public Point(double x, double y, Wall wall) {
+	public Point(double x, double y, Wall wall, int wallIndex) {
 		this.x = x;
 		this.y = y;
 		this.wall = wall;
+		this.wallIndex = wallIndex;
 	}
 	
 	public double distanceTo(Point p) {

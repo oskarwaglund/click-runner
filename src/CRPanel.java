@@ -30,7 +30,7 @@ public class CRPanel extends JPanel implements MouseInputListener, KeyListener {
 		addMouseMotionListener(this);
 		hero = new Hero(200, 400);
 
-		createWalls();
+		walls = new ArrayList<>();
 		mesh = new Mesh(walls);
 
 		addKeyListener(this);
@@ -41,47 +41,7 @@ public class CRPanel extends JPanel implements MouseInputListener, KeyListener {
 		};
 		new Timer(TIMER_DELAY, listener).start();
 	}
-
-	void createWalls() {
-		int WALL_WIDTH = 20;
-
-		walls = new ArrayList<>();
-
-		// Blocks
-		walls.add(new Wall(100, 100, 100, 100));
-		walls.add(new Wall(0, 200, 300, WALL_WIDTH));
-		walls.add(new Wall(200, 300, 300, WALL_WIDTH));
-		walls.add(new Wall(400, 400, WALL_WIDTH, WALL_WIDTH));
-
-		// Circle
-		walls.add(new Wall(200, 400, 40));
-
-		// Sine
-		final int sineXStart = 600;
-		final int sineYStart = 200;
-		int sinePoints = 20;
-
-		int[] sineX = new int[sinePoints + 2];
-		int[] sineY = new int[sinePoints + 2];
-
-		int[] sineX2 = new int[sinePoints + 2];
-		int[] sineY2 = new int[sinePoints + 2];
-
-		final int SINE_INTERVAL = 10;
-		for (int i = 0; i < sinePoints; i++) {
-			sineX[i] = sineX2[i] = sineXStart + i * SINE_INTERVAL;
-			sineY[i] = sineYStart + (int) (20 * Math.sin(4 * i * Math.PI / sinePoints));
-			sineY2[i] = sineY[i] + 20;
-		}
-		sineX[sinePoints] = sineX2[sinePoints] = sineX[sinePoints - 1];
-		sineX[sinePoints + 1] = sineX2[sinePoints + 1] = sineX[0];
-		sineY[sinePoints] = sineY[sinePoints + 1] = sineY[0] - 100;
-		sineY2[sinePoints] = sineY2[sinePoints + 1] = sineY2[0] + 100;
-
-		walls.add(new Wall(sineX, sineY));
-		walls.add(new Wall(sineX2, sineY2));
-	}
-
+	
 	void run() {
 		step();
 		paint();
