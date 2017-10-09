@@ -22,7 +22,7 @@ public class CRPanel extends JPanel implements MouseInputListener, KeyListener {
 	static final int TIMER_DELAY = 20;
 	boolean showMesh;
 	boolean showPath;
-
+	
 	CRPanel() {
 		setBackground(new Color(200, 200, 200));
 		addMouseListener(this);
@@ -115,9 +115,23 @@ public class CRPanel extends JPanel implements MouseInputListener, KeyListener {
 			editedWall.paintEdit(g, walls);
 		}
 		
+		int x = 10;
+		int y = 10;
+		final int yInc = 10;
 		g.setColor(Color.WHITE);
-		g.drawString("Mesh points: " + mesh.points.size(), 10, 20);
-		g.drawString("Connections: " + mesh.connections.size(), 10, 30);
+		g.drawString("***Controls***", x, y);
+		y += yInc;
+		g.drawString("M: Toggle mesh", x, y);
+		y += yInc;
+		g.drawString("P: Toggle path", x, y);
+		y += yInc;
+		
+		y += yInc;
+		g.drawString("***Metrics***", x, y);
+		y += yInc;
+		g.drawString("Mesh points: " + mesh.points.size(), x, y);
+		y += yInc;
+		g.drawString("Connections: " + mesh.connections.size(), x, y);
 	}
 
 	@Override

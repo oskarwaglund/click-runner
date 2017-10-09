@@ -103,5 +103,9 @@ public class Wall extends Polygon{
 		}
 		g.setColor(color);
 		g.fillPolygon(this);
+		
+		g.setColor(Color.WHITE);
+		g.drawString("ESC:\tQuit", xpoints[npoints-1] + 10, ypoints[npoints-1]);
+		g.drawString("Enter:\tConfirm", xpoints[npoints-1] + 10, ypoints[npoints-1] + 10);
 	}
 }
