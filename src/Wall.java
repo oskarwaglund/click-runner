@@ -2,8 +2,6 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Polygon;
 import java.awt.geom.Line2D;
-import java.awt.geom.PathIterator;
-import java.nio.file.Path;
 import java.util.ArrayList;
 
 public class Wall extends Polygon{
@@ -102,10 +100,15 @@ public class Wall extends Polygon{
 			color = Color.RED;
 		}
 		g.setColor(color);
-		g.fillPolygon(this);
+		if(npoints == 2) {
+			g.drawLine(xpoints[0], ypoints[0], xpoints[1], ypoints[1]);
+		} else {
+			g.fillPolygon(this);
+		}
+		
 		
 		g.setColor(Color.WHITE);
-		g.drawString("ESC:\tQuit", xpoints[npoints-1] + 10, ypoints[npoints-1]);
-		g.drawString("Enter:\tConfirm", xpoints[npoints-1] + 10, ypoints[npoints-1] + 10);
+		g.drawString("ESC: Quit", xpoints[npoints-1] + 10, ypoints[npoints-1]);
+		g.drawString("Enter: Confirm", xpoints[npoints-1] + 10, ypoints[npoints-1] + 10);
 	}
 }

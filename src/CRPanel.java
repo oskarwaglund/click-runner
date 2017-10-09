@@ -1,4 +1,5 @@
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -42,16 +43,9 @@ public class CRPanel extends JPanel implements MouseInputListener, KeyListener {
 	}
 
 	void createWalls() {
-		int WALL_SIZE = 500;
 		int WALL_WIDTH = 20;
 
 		walls = new ArrayList<>();
-
-		// Frame
-		// walls.add(new Wall(0, 0, WALL_SIZE, WALL_WIDTH));
-		// walls.add(new Wall(0, 0, WALL_WIDTH, WALL_SIZE));
-		// walls.add(new Wall(WALL_SIZE-WALL_WIDTH, 0, WALL_WIDTH, WALL_SIZE));
-		// walls.add(new Wall(0, WALL_SIZE-WALL_WIDTH, WALL_SIZE, WALL_WIDTH));
 
 		// Blocks
 		walls.add(new Wall(100, 100, 100, 100));
@@ -103,7 +97,7 @@ public class CRPanel extends JPanel implements MouseInputListener, KeyListener {
 
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
-
+		g.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
 		for (Wall w : walls) {
 			w.paint(g);
 		}
@@ -117,21 +111,23 @@ public class CRPanel extends JPanel implements MouseInputListener, KeyListener {
 		
 		int x = 10;
 		int y = 10;
-		final int yInc = 10;
-		g.setColor(Color.WHITE);
-		g.drawString("***Controls***", x, y);
-		y += yInc;
-		g.drawString("M: Toggle mesh", x, y);
-		y += yInc;
-		g.drawString("P: Toggle path", x, y);
-		y += yInc;
+		String[] strings = new String[] {
+			"***Controls***",
+			"M:           Toggle mesh",
+			"P:           Toggle path",
+			"Left click:  Set path",
+			"Right click: Create wall",
+			"",
+			"***Metrics***",
+			"Mesh points: " + mesh.points.size(),
+			"Connections: " + mesh.connections.size()
+		};
 		
-		y += yInc;
-		g.drawString("***Metrics***", x, y);
-		y += yInc;
-		g.drawString("Mesh points: " + mesh.points.size(), x, y);
-		y += yInc;
-		g.drawString("Connections: " + mesh.connections.size(), x, y);
+		g.setColor(Color.WHITE);
+		for(String s: strings) {
+			g.drawString(s, x, y);
+			y += g.getFontMetrics().getHeight();
+		}
 	}
 
 	@Override
