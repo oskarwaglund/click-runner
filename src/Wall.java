@@ -2,6 +2,9 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Polygon;
 import java.awt.geom.Line2D;
+import java.awt.geom.PathIterator;
+import java.nio.file.Path;
+import java.util.ArrayList;
 
 public class Wall extends Polygon{
 	
@@ -44,6 +47,10 @@ public class Wall extends Polygon{
 		}
 	}
 	
+	public Wall() {
+		super();
+	}
+	
 	public boolean collide(Line2D.Double line) {
 		if(contains(line.getX1(), line.getY1()) || contains(line.getX2(), line.getY2())) {
 			return true;
@@ -57,8 +64,44 @@ public class Wall extends Polygon{
 		return false;
 	}
 	
+	public boolean collide(Wall wall) {
+		if(getBounds().intersects(wall.getBounds())) {
+			for(int i = 0; i < wall.npoints; i++) {
+				Line2D.Double side = new Line2D.Double(wall.xpoints[i], wall.ypoints[i], wall.xpoints[(i+1)%wall.npoints], wall.ypoints[(i+1)%wall.npoints]);
+				if(collide(side)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	public boolean touchesOther(ArrayList<Wall> walls) {
+		for(Wall w: walls) {
+			if(collide(w)){
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public void moveLast(int x, int y) {
+		xpoints[npoints-1] = x;
+		ypoints[npoints-1] = y;
+		bounds = null;
+	}
+	
 	public void paint(Graphics g) {
 		g.setColor(new Color(100,100,100));
+		g.fillPolygon(this);
+	}
+	
+	public void paintEdit(Graphics g, ArrayList<Wall> walls) {
+		Color color = Color.GREEN;
+		if(touchesOther(walls)) {
+			color = Color.RED;
+		}
+		g.setColor(color);
 		g.fillPolygon(this);
 	}
 }

@@ -5,7 +5,7 @@ public class ClickRunner {
 		JFrame window = new JFrame("ClickRunner");
 		CRPanel content = new CRPanel();
 		window.setContentPane(content);
-		window.setSize(700, 700);
+		window.setSize(1000, 1000);
 		window.setLocation(100, 100);
 		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		window.setVisible(true);
