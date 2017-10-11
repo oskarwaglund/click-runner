@@ -3,34 +3,77 @@ import java.awt.Graphics;
 import java.awt.geom.Line2D;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 public abstract class Unit {
 	
-	private final int MAX_HP = 0;
-	
-	double x, y;
+	protected double x, y;
 
-	abstract double speed();
-	abstract int size();
-	abstract int getMaxHP();
-	int hp;
+	private int hp;
+	protected int deadCounter;
+	
+	protected int team;
+	
+	protected int attackCounter;	
+	protected Unit attackTarget;
+	
+	protected Color color;
 	
 	ArrayDeque<Point> path;
 	
+	abstract double speed();
+	abstract int size();
+	
+	abstract int getMaxHP();
+	
+	abstract int attackRange();
+	abstract int attackDuration();
+	abstract int damageFrame();
+	abstract int damage();
+	abstract int deathTime();
+	
+	abstract int visionRange();
+	
+	abstract void paint(Graphics g, boolean showPath, boolean selected);
+	
+	static Map<Integer, Color> TEAM_COLORS;
+	static {
+		TEAM_COLORS = new TreeMap<>();
+		TEAM_COLORS.put(1, Color.RED);
+		TEAM_COLORS.put(2, Color.BLUE);
+	}
 	public Unit(double x, double y) {
+		this(x, y, 1);
+	}
+	
+	public Unit(double x, double y, int team) {
 		this.x = x;
 		this.y = y;
 		
-		hp = MAX_HP;
+		this.hp = getMaxHP();
+		this.deadCounter = 0;
 		
-		path = new ArrayDeque<>();
+		this.team = team;
+		
+		this.attackCounter = -1;
+		this.attackTarget = null;
+		
+		this.color = TEAM_COLORS.get(team);
+		if(color == null) {
+			color = Color.CYAN;
+		}
+		
+		this.path = new ArrayDeque<>();
 	}
-	
-	/* Pathing */
-	
-	public void setPath(Point target, Mesh mesh, ArrayList<Wall> walls) {
+		
+	public void setPath(Point target, Mesh mesh, ArrayList<Wall> walls, boolean stack) {
+		if(!stack) {
+			path.clear();
+		}
+		
 		ArrayList<Node> nodes = new ArrayList<>();
 		for(Point p: mesh.points) {
 			nodes.add(new Node(p.x, p.y));
@@ -73,7 +116,6 @@ public abstract class Unit {
 		Point goalPoint = new Point(goal.x, goal.y);
 		
 		if(startPoint.sees(goalPoint, walls)) {
-			path.clear();
 			path.add(goalPoint);
 			return;
 		}
@@ -93,7 +135,6 @@ public abstract class Unit {
 		if(!goalReachable) {
 			return;
 		}
-		path.clear();
 		path.addAll(aStar(start, goal));
 	}
 	
@@ -104,7 +145,7 @@ public abstract class Unit {
 		Set<Node> closed = new TreeSet<>();
 		
 		start.gScore = 0;
-		start.fScore = distance(start, goal);
+		start.fScore = Node.distance(start, goal);
 		open.add(start);
 		while(!open.isEmpty()) {
 			Node current = null;
@@ -136,11 +177,11 @@ public abstract class Unit {
 					open.add(neighbor);
 				}
 				
-				double newGScore = current.gScore + distance(current, neighbor);
+				double newGScore = current.gScore + Node.distance(current, neighbor);
 				if(newGScore <= neighbor.gScore) {
 					neighbor.bestFrom = current;
 					neighbor.gScore = newGScore;
-					neighbor.fScore = neighbor.gScore + distance(neighbor, goal);
+					neighbor.fScore = neighbor.gScore + Node.distance(neighbor, goal);
 				}
 			}
 		}
@@ -157,19 +198,25 @@ public abstract class Unit {
 				if(w.collide(line)) {
 					Point target = path.removeLast();
 					path.clear();
-					setPath(target, mesh, walls);
+					setPath(target, mesh, walls, false);
 					return;
 				}
 			}
 		}
 	}
 	
-	static double distance(Node n1, Node n2) {
-		return Math.hypot(n1.x-n2.x, n1.y-n2.y);
-	}
-	
 	public void step() {
-		if(path.size() > 0) {
+		if(isDead()) {
+			deadCounter++;
+			return;
+		}
+		if(attackTarget != null) {
+			if(attackTarget.isDead()) {
+				attackTarget = null;
+			} else {
+				attack();
+			}
+		} else if(path.size() > 0) {
 			Point p = path.getFirst();
 			double distanceToPoint = p.distanceTo(new Point(this.x, this.y));
 			if(distanceToPoint >= speed()) {
@@ -183,26 +230,86 @@ public abstract class Unit {
 		}
 	}
 	
-	public void paint(Graphics g, boolean showPath, boolean selected) {
-		g.setColor(Color.RED);
-		g.fillOval((int)(x - size()/2), (int)(y - size()/2), size(), size());
-		
-		if(showPath) {
-			g.setColor(Color.GREEN);
-			int lastX = (int)x;
-			int lastY = (int)y;
-			for(Point p: path) {
-				g.drawLine(lastX, lastY, (int)p.x, (int)p.y);
-				lastX = (int)p.x;
-				lastY = (int)p.y;
+	public void attack() {
+		double distance = distanceTo(attackTarget);
+		if(distance <= attackRange()) {
+			if(attackCounter < 0) {
+				attackCounter = 0;
 			}
+		} else {
+			x += (attackTarget.x - x)/distance*speed();
+			y += (attackTarget.y - y)/distance*speed(); 
 		}
-		
-		if(selected) {
-			g.setColor(Color.YELLOW);
-			g.fillOval((int)x-2, (int)(y-size()-10), 4, 4);
-		}
-		
+		if(attackCounter >= 0) {
+			attackCounter++;
+			if(attackCounter == damageFrame()) {
+				attackTarget.hp -= damage();
+			}
+			if(attackCounter >= attackDuration()) {
+				attackCounter = -1;
+			}
+		}		
 	}
 	
+	public double distanceTo(Unit u) {
+		return Math.hypot(u.x-x, u.y-y);
+	}
+	
+	public boolean sees(Unit u, ArrayList<Wall> walls) {
+		Line2D.Double line = new Line2D.Double(x,  y, u.x, u.y);
+		for(Wall w: walls) {
+			if(w.collide(line)) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	protected void paintHealthBar(Graphics g) {
+		final int scale = 2;
+		final int width = getMaxHP()*scale;
+		final int height = 6;
+		final int barWidth = hp*scale;
+
+		final int barX = (int)(x - width/2);
+		final int barY = (int)(y - size()/2 - 2*height);
+		g.setColor(Color.RED);
+		g.fillRect(barX, barY, width, height);
+		g.setColor(Color.GREEN);
+		g.fillRect(barX, barY, barWidth, height);
+	}
+		
+	public double getX() {
+		return x;
+	}
+	public double getY() {
+		return y;
+	}
+	public int getHp() {
+		return hp;
+	}
+	public int getTeam() {
+		return team;
+	}
+	public int getAttackCounter() {
+		return attackCounter;
+	}
+	public void setAttackTarget(Unit attackTarget) {
+		if(attackTarget != null) {
+			this.attackTarget = attackTarget;
+			attackCounter = -1;
+		}
+	}
+	public Unit getAttackTarget() {
+		return attackTarget;
+	}
+	public ArrayDeque<Point> getPath() {
+		return path;
+	}
+	public boolean isDead() {
+		return hp <= 0;
+	}
+	public boolean remove() {
+		return deadCounter >= deathTime();
+	}
 }

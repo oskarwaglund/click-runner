@@ -41,9 +41,13 @@ public class GamePanel extends JPanel implements MouseInputListener, KeyListener
 
 		units = new ArrayList<>();
 		selectedUnits = new ArrayList<>();
-		for (int i = 0; i < 100; i++) {
-			units.add(new Drone(200, 200 + 30 * i));
-		}
+		/*for (int i = 0; i < 100; i++) {
+			units.add(new Drone(200 + (i/10) * 10, 200 + (i%10) * 10 ));
+		}*/
+		
+		units.add(new Drone(100, 100, 1));
+		units.add(new Drone(100, 120, 1));
+		units.add(new Drone(100, 380, 2));
 
 		selection = null;
 		walls = new ArrayList<>();
@@ -59,18 +63,37 @@ public class GamePanel extends JPanel implements MouseInputListener, KeyListener
 	}
 
 	void run() {
-		step();
-		paint();
+		stepUnits();
+		Clock.tick();
+		repaint();
 	}
 
-	void step() {
+	void stepUnits() {
+		for (Unit u1 : units) {
+			if(u1.getAttackTarget() == null) {
+				Unit target = null;
+				double closestDistance = u1.visionRange();
+				for (Unit u2 : units) {
+					if(u1.getTeam() == u2.getTeam() || u2.isDead() || !u1.sees(u2, walls)) continue;
+					double distance = u1.distanceTo(u2);
+					if(distance <= closestDistance) {
+						closestDistance = distance;
+						target = u2;
+					}
+				}
+				u1.setAttackTarget(target);
+			}
+		}
+		
 		for (Unit u : units) {
 			u.step();
 		}
-	}
-
-	void paint() {
-		repaint();
+		
+		for(int i = units.size() - 1; i >= 0; i--) {
+			if(units.get(i).remove()) {
+				units.remove(i);
+			}
+		}
 	}
 
 	public void paintComponent(Graphics g) {
@@ -143,7 +166,7 @@ public class GamePanel extends JPanel implements MouseInputListener, KeyListener
 		}
 		selectedUnits.clear();
 		for (Unit u : units) {
-			if (selection.contains(u.x, u.y)) {
+			if (selection.contains(u.getX(), u.getY())) {
 				selectedUnits.add(u);
 			}
 		}
@@ -184,7 +207,7 @@ public class GamePanel extends JPanel implements MouseInputListener, KeyListener
 			break;
 		case MouseEvent.BUTTON3:
 			for (Unit u : selectedUnits) {
-				u.setPath(new Point(e.getX(), e.getY()), mesh, walls);
+				u.setPath(new Point(e.getX(), e.getY()), mesh, walls, false);
 			}
 			break;
 		}

@@ -6,6 +6,15 @@ public class Vector {
 		this.y = y;
 	}
 	
+	public Vector(Unit u1, Unit u2) {
+		this.x = u2.x - u1.x;
+		this.y = u2.y - u1.y;
+	}
+	
+	public Vector multiply(double a) {
+		return new Vector(x*a, y*a);
+	}
+	
 	public double scalar(Vector v) {
 		return x*v.x + y*v.y;
 	}

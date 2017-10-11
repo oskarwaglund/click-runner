@@ -83,8 +83,8 @@ public class Wall extends Polygon{
 		return false;
 	}
 	
-	public boolean touchesHero(Drone hero) {
-		if(contains(hero.x, hero.y)) {
+	public boolean touchesUnit(Unit unit) {
+		if(contains(unit.getX(), unit.getY())) {
 			return true;
 		}
 		return false;
@@ -97,8 +97,8 @@ public class Wall extends Polygon{
 		bounds = null;
 	}
 	
-	public void paint(Graphics g) {
-		g.setColor(new Color(100,100,100));
+	private void paint(Graphics g, Color color) {
+		g.setColor(color);
 		if(npoints == 2) {
 			g.drawLine(xpoints[0], ypoints[0], xpoints[1], ypoints[1]);
 		} else {
@@ -106,25 +106,17 @@ public class Wall extends Polygon{
 		}	
 	}
 	
-	public void paintEdit(Graphics g, ArrayList<Wall> walls, Drone hero) {
-		Color color = Color.GREEN;
-		
-		if(walls != null && touchesWall(walls)) {
-			color = Color.RED;
-		} else if (hero != null && touchesHero(hero)) {
-			color = Color.RED;
-		}
-		g.setColor(color);
-		if(npoints == 2) {
-			g.drawLine(xpoints[0], ypoints[0], xpoints[1], ypoints[1]);
-		} else {
-			g.fillPolygon(this);
-		}
-		
+	public void paint(Graphics g) {
+		paint(g, new Color(100, 100, 100));
+	}
+	
+	public void paintEdit(Graphics g) {
+		paint(g, Color.GREEN);
 		
 		g.setColor(Color.WHITE);
-		g.drawString("ESC: Quit", xpoints[npoints-1] + 10, ypoints[npoints-1]);
-		g.drawString("Enter: Confirm", xpoints[npoints-1] + 10, ypoints[npoints-1] + 10);
+		g.drawString("ESC:         Quit", xpoints[npoints-1] + 10, ypoints[npoints-1]);
+		g.drawString("Left click:  Place point", xpoints[npoints-1] + 10, ypoints[npoints-1] + 10);
+		g.drawString("Right click: Confirm", xpoints[npoints-1] + 10, ypoints[npoints-1] + 20);
 	}
 	
 	public String toString() {

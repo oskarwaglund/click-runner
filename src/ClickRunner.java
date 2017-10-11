@@ -10,11 +10,15 @@ public class ClickRunner {
 		gameWindow.setVisible(true);
 		gameWindow.setExtendedState(JFrame.MAXIMIZED_BOTH); 
 		
+		/*
+		
 		JFrame editWindow = new JFrame("ClickRunner: Editor");
 		EditPanel editContent = new EditPanel(gameContent);
 		editWindow.setContentPane(editContent);
 		editWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		editWindow.setVisible(true);
 		editWindow.setExtendedState(JFrame.MAXIMIZED_BOTH); 
+		
+		*/
 	}
 }

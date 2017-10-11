@@ -29,4 +29,8 @@ class Node implements Comparable<Node>{
 			}
 			return (int)Math.signum(y - n.y);
 		}
+		
+		static double distance(Node n1, Node n2) {
+			return Math.hypot(n1.x-n2.x, n1.y-n2.y);
+		}
 	}

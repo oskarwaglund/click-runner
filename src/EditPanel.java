@@ -7,7 +7,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -53,7 +52,7 @@ public class EditPanel extends JPanel implements MouseInputListener, KeyListener
 			w.paint(g);
 		}
 		if (editedWall != null) {
-			editedWall.paintEdit(g, walls, null);
+			editedWall.paintEdit(g);
 		}
 
 		int x = 10;
