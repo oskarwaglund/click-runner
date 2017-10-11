@@ -15,7 +15,6 @@ public class Mesh {
 	
 	ArrayList<Point> points;
 	ArrayList<Connection> connections;
-	int cornerDistance = 1;
 	
 	public Mesh(ArrayList<Wall> walls) {
 		points = new ArrayList<>();
