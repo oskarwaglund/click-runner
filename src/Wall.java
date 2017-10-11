@@ -74,17 +74,22 @@ public class Wall extends Polygon{
 		return false;
 	}
 	
-	public boolean touchesOther(ArrayList<Wall> walls, Hero hero) {
+	public boolean touchesWall(ArrayList<Wall> walls) {
 		for(Wall w: walls) {
 			if(collide(w)){
 				return true;
 			}
 		}
+		return false;
+	}
+	
+	public boolean touchesHero(Hero hero) {
 		if(contains(hero.x, hero.y)) {
 			return true;
 		}
 		return false;
 	}
+	
 	
 	public void moveLast(int x, int y) {
 		xpoints[npoints-1] = x;
@@ -94,12 +99,19 @@ public class Wall extends Polygon{
 	
 	public void paint(Graphics g) {
 		g.setColor(new Color(100,100,100));
-		g.fillPolygon(this);
+		if(npoints == 2) {
+			g.drawLine(xpoints[0], ypoints[0], xpoints[1], ypoints[1]);
+		} else {
+			g.fillPolygon(this);
+		}	
 	}
 	
 	public void paintEdit(Graphics g, ArrayList<Wall> walls, Hero hero) {
 		Color color = Color.GREEN;
-		if(touchesOther(walls, hero)) {
+		
+		if(walls != null && touchesWall(walls)) {
+			color = Color.RED;
+		} else if (hero != null && touchesHero(hero)) {
 			color = Color.RED;
 		}
 		g.setColor(color);
@@ -113,5 +125,13 @@ public class Wall extends Polygon{
 		g.setColor(Color.WHITE);
 		g.drawString("ESC: Quit", xpoints[npoints-1] + 10, ypoints[npoints-1]);
 		g.drawString("Enter: Confirm", xpoints[npoints-1] + 10, ypoints[npoints-1] + 10);
+	}
+	
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		for(int i = 0; i < npoints; i++) {
+			sb.append(xpoints[i] + "," + ypoints[i] + ",");
+		}
+		return sb.toString();
 	}
 }

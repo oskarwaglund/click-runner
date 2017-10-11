@@ -6,33 +6,33 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 
+import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 import javax.swing.event.MouseInputListener;
 
-public class CRPanel extends JPanel implements MouseInputListener, KeyListener {
+public class EditPanel extends JPanel implements MouseInputListener, KeyListener {
 
-	Hero hero;
-	Mesh mesh;
 	ArrayList<Wall> walls;
-
 	Wall editedWall;
 
-	static final int TIMER_DELAY = 20;
-	boolean showMesh;
-	boolean showPath;
+	GamePanel gamePanel;
 	
-	CRPanel() {
+	static final int TIMER_DELAY = 20;
+
+	public EditPanel(GamePanel gamePanel) {
 		setBackground(new Color(200, 200, 200));
 		addMouseListener(this);
 		addMouseMotionListener(this);
-		hero = new Hero(200, 400);
 
 		walls = new ArrayList<>();
-		mesh = new Mesh(walls);
-
+		this.gamePanel = gamePanel;
 		addKeyListener(this);
 		ActionListener listener = new ActionListener() {
 			public void actionPerformed(ActionEvent evt) {
@@ -41,17 +41,8 @@ public class CRPanel extends JPanel implements MouseInputListener, KeyListener {
 		};
 		new Timer(TIMER_DELAY, listener).start();
 	}
-	
+
 	void run() {
-		step();
-		paint();
-	}
-
-	void step() {
-		hero.step();
-	}
-
-	void paint() {
 		repaint();
 	}
 
@@ -61,32 +52,41 @@ public class CRPanel extends JPanel implements MouseInputListener, KeyListener {
 		for (Wall w : walls) {
 			w.paint(g);
 		}
-		if (showMesh) {
-			mesh.paint(g);
-		}
-		hero.paint(g, showPath);
 		if (editedWall != null) {
-			editedWall.paintEdit(g, walls, hero);
+			editedWall.paintEdit(g, walls, null);
 		}
-		
+
 		int x = 10;
 		int y = 10;
-		String[] strings = new String[] {
-			"***Controls***",
-			"M:           Toggle mesh",
-			"P:           Toggle path",
-			"Left click:  Set path",
-			"Right click: Create wall",
-			"",
-			"***Metrics***",
-			"Mesh points: " + mesh.points.size(),
-			"Connections: " + mesh.connections.size()
-		};
-		
+		String[] strings = new String[] { 
+				"***Controls***", 
+				"Left click:  Create wall"};
+
 		g.setColor(Color.WHITE);
-		for(String s: strings) {
+		for (String s : strings) {
 			g.drawString(s, x, y);
 			y += g.getFontMetrics().getHeight();
+		}
+	}
+	
+	void exportToGame() {
+		gamePanel.setWalls(walls);
+	}
+	
+	void exportToFile() {
+		final JFileChooser fc = new JFileChooser();
+		int returnVal = fc.showSaveDialog(this);
+		if(returnVal == JFileChooser.APPROVE_OPTION) {
+			File file = fc.getSelectedFile();
+			try {
+				FileOutputStream fos = new FileOutputStream(file);
+				for(Wall w: walls) {
+					fos.write((w.toString() + "\n").getBytes());
+				}
+				fos.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -97,7 +97,6 @@ public class CRPanel extends JPanel implements MouseInputListener, KeyListener {
 
 	@Override
 	public void mouseEntered(MouseEvent e) {
-
 	}
 
 	@Override
@@ -114,14 +113,17 @@ public class CRPanel extends JPanel implements MouseInputListener, KeyListener {
 	public void mouseReleased(MouseEvent e) {
 		switch (e.getButton()) {
 		case MouseEvent.BUTTON1:
-			hero.setPath(new Point(e.getX(), e.getY()), mesh, walls);
-			break;
-		case MouseEvent.BUTTON3:
 			if (editedWall == null) {
 				editedWall = new Wall();
 				editedWall.addPoint(e.getX(), e.getY());
 			}
 			editedWall.addPoint(e.getX(), e.getY());
+			break;
+		case MouseEvent.BUTTON3:
+			if (editedWall != null && !editedWall.touchesWall(walls)) {
+				walls.add(editedWall);
+				editedWall = null;
+			}
 			break;
 		}
 
@@ -129,27 +131,17 @@ public class CRPanel extends JPanel implements MouseInputListener, KeyListener {
 
 	@Override
 	public void keyPressed(KeyEvent arg0) {
-
+		
 	}
 
 	@Override
 	public void keyReleased(KeyEvent e) {
 		switch (e.getKeyCode()) {
-		case KeyEvent.VK_M:
-			showMesh = !showMesh;
+		case KeyEvent.VK_E:
+			exportToGame();
 			break;
-		case KeyEvent.VK_P:
-			showPath = !showPath;
-			break;
-		case KeyEvent.VK_ENTER:
-			if (editedWall != null && !editedWall.touchesOther(walls, hero)) {
-				walls.add(editedWall);
-				editedWall = null;
-				
-				mesh=new Mesh(walls);
-				hero.updatePath(mesh, walls);
-			}
-			mesh = new Mesh(walls);
+		case KeyEvent.VK_S:
+			exportToFile();
 			break;
 		case KeyEvent.VK_ESCAPE:
 			editedWall = null;

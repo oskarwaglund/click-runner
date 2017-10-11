@@ -3,11 +3,18 @@ import javax.swing.JFrame;
 
 public class ClickRunner {
 	public static void main(String[] args) {
-		JFrame window = new JFrame("ClickRunner");
-		CRPanel content = new CRPanel();
-		window.setContentPane(content);
-		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		window.setVisible(true);
-		window.setExtendedState(JFrame.MAXIMIZED_BOTH); 
+		JFrame gameWindow = new JFrame("ClickRunner: Game");
+		GamePanel gameContent = new GamePanel();
+		gameWindow.setContentPane(gameContent);
+		gameWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		gameWindow.setVisible(true);
+		gameWindow.setExtendedState(JFrame.MAXIMIZED_BOTH); 
+		
+		JFrame editWindow = new JFrame("ClickRunner: Editor");
+		EditPanel editContent = new EditPanel(gameContent);
+		editWindow.setContentPane(editContent);
+		editWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		editWindow.setVisible(true);
+		editWindow.setExtendedState(JFrame.MAXIMIZED_BOTH); 
 	}
 }
