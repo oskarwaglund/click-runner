@@ -1,5 +1,8 @@
+package abstracts;
 import java.awt.geom.Line2D;
 import java.util.ArrayList;
+
+import map.Wall;
 
 public class Point {
 
@@ -46,5 +49,21 @@ public class Point {
 	
 	public String toString() {
 		return "[" + x + ", " + y + "]";
+	}
+
+	public double getX() {
+		return x;
+	}
+
+	public double getY() {
+		return y;
+	}
+
+	public Wall getWall() {
+		return wall;
+	}
+
+	public int getWallIndex() {
+		return wallIndex;
 	}
 }

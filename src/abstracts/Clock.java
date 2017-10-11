@@ -1,3 +1,4 @@
+package abstracts;
 
 public class Clock {
 	
@@ -5,11 +6,11 @@ public class Clock {
 	
 	private static long clock = 0;
 	
-	static long getClock() {
+	public static long getClock() {
 		return clock;
 	}
 	
-	static void tick() {
+	public static void tick() {
 		++clock;
 	}
 }

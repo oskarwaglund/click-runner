@@ -1,3 +1,4 @@
+package game;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -15,6 +16,8 @@ import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 import javax.swing.event.MouseInputListener;
+
+import map.Wall;
 
 public class EditPanel extends JPanel implements MouseInputListener, KeyListener {
 

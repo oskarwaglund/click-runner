@@ -1,8 +1,11 @@
+package map;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Polygon;
 import java.awt.geom.Line2D;
 import java.util.ArrayList;
+
+import units.Unit;
 
 public class Wall extends Polygon{
 	

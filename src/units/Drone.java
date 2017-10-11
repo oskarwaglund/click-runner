@@ -1,5 +1,10 @@
+package units;
 import java.awt.Color;
 import java.awt.Graphics;
+
+import abstracts.Clock;
+import abstracts.Point;
+import abstracts.Vector;
 
 public class Drone extends Unit{
 
@@ -58,7 +63,7 @@ public class Drone extends Unit{
 	}
 
 	@Override
-	int visionRange() {
+	public int visionRange() {
 		return VISION_RANGE;
 	}
 	
@@ -73,8 +78,8 @@ public class Drone extends Unit{
 		
 		if(!isDead() && attackTarget != null && attackCounter < DAMAGE_FRAME*2) {
 			Vector v = new Vector(this, attackTarget).multiply(0.5*Math.sin((double)attackCounter / DAMAGE_FRAME / 2 * Math.PI));
-			x += v.x;
-			y += v.y;
+			x += v.getX();
+			y += v.getY();
 		}
 
 		if(isDead()) {
@@ -92,9 +97,9 @@ public class Drone extends Unit{
 			int lastX = (int)x;
 			int lastY = (int)y;
 			for(Point p: path) {
-				g.drawLine(lastX, lastY, (int)p.x, (int)p.y);
-				lastX = (int)p.x;
-				lastY = (int)p.y;
+				g.drawLine(lastX, lastY, (int)p.getX(), (int)p.getY());
+				lastX = (int)p.getX();
+				lastY = (int)p.getY();
 			}
 		}
 		

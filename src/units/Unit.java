@@ -1,3 +1,4 @@
+package units;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.geom.Line2D;
@@ -7,6 +8,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+
+import abstracts.Mesh;
+import abstracts.Node;
+import abstracts.Point;
+import map.Wall;
 
 public abstract class Unit {
 	
@@ -35,9 +41,9 @@ public abstract class Unit {
 	abstract int damage();
 	abstract int deathTime();
 	
-	abstract int visionRange();
+	public abstract int visionRange();
 	
-	abstract void paint(Graphics g, boolean showPath, boolean selected);
+	public abstract void paint(Graphics g, boolean showPath, boolean selected);
 	
 	static Map<Integer, Color> TEAM_COLORS;
 	static {
@@ -75,13 +81,13 @@ public abstract class Unit {
 		}
 		
 		ArrayList<Node> nodes = new ArrayList<>();
-		for(Point p: mesh.points) {
-			nodes.add(new Node(p.x, p.y));
+		for(Point p: mesh.getPoints()) {
+			nodes.add(new Node(p.getX(), p.getY()));
 		}
 		
-		for(Mesh.Connection c: mesh.connections) {
-			Node n1 = nodes.get(c.i1);
-			Node n2 = nodes.get(c.i2);
+		for(Mesh.Connection c: mesh.getConnections()) {
+			Node n1 = nodes.get(c.getI1());
+			Node n2 = nodes.get(c.getI2());
 			
 			n1.addNeighbor(n2);
 			n2.addNeighbor(n1);
@@ -97,8 +103,8 @@ public abstract class Unit {
 			double radius = Math.random();
 			radius *= radius * 20;
 			double angle = Math.random() * 2 * Math.PI;
-			double x = target.x + Math.cos(angle)*radius;
-			double y = target.y + Math.sin(angle)*radius;
+			double x = target.getX() + Math.cos(angle)*radius;
+			double y = target.getY() + Math.sin(angle)*radius;
 			
 			for(Wall w: walls) {
 				if(w.contains(x, y)) {
@@ -108,12 +114,12 @@ public abstract class Unit {
 			goal = new Node(x, y);
 		}
 		if(goal == null) {
-			goal = new Node(target.x, target.y);
+			goal = new Node(target.getX(), target.getY());
 		}
 		
 		
-		Point startPoint = new Point(start.x, start.y);
-		Point goalPoint = new Point(goal.x, goal.y);
+		Point startPoint = new Point(start.getX(), start.getY());
+		Point goalPoint = new Point(goal.getX(), goal.getY());
 		
 		if(startPoint.sees(goalPoint, walls)) {
 			path.add(goalPoint);
@@ -122,7 +128,7 @@ public abstract class Unit {
 		
 		boolean goalReachable = false;
 		for(Node n: nodes) {
-			Point nodePoint = new Point(n.x, n.y);
+			Point nodePoint = new Point(n.getX(), n.getY());
 			if(nodePoint.sees(startPoint, walls)) {
 				start.addNeighbor(n);
 			}
@@ -144,31 +150,31 @@ public abstract class Unit {
 		Set<Node> open = new TreeSet<>();
 		Set<Node> closed = new TreeSet<>();
 		
-		start.gScore = 0;
-		start.fScore = Node.distance(start, goal);
+		start.setgScore(0);
+		start.setfScore(Node.distance(start, goal));
 		open.add(start);
 		while(!open.isEmpty()) {
 			Node current = null;
 			double lowestFScore = Double.MAX_VALUE;
 			for(Node n: open) {
-				if(current == null || n.fScore < lowestFScore) {
+				if(current == null || n.getfScore() < lowestFScore) {
 					current = n;
-					lowestFScore = n.fScore;
+					lowestFScore = n.getfScore();
 				}
 			}
 			
 			if(current.compareTo(goal) == 0) {
 				Node n = goal;
 				while(n != start) {
-					path.addFirst(new Point(n.x, n.y));
-					n = n.bestFrom;
+					path.addFirst(new Point(n.getX(), n.getY()));
+					n = n.getBestFrom();
 				}
 			}
 			
 			open.remove(current);
 			closed.add(current);
 			
-			for(Node neighbor: current.neighbors) {
+			for(Node neighbor: current.getNeighbors()) {
 				if(closed.contains(neighbor)) {
 					continue;
 				}
@@ -177,11 +183,11 @@ public abstract class Unit {
 					open.add(neighbor);
 				}
 				
-				double newGScore = current.gScore + Node.distance(current, neighbor);
-				if(newGScore <= neighbor.gScore) {
-					neighbor.bestFrom = current;
-					neighbor.gScore = newGScore;
-					neighbor.fScore = neighbor.gScore + Node.distance(neighbor, goal);
+				double newGScore = current.getgScore() + Node.distance(current, neighbor);
+				if(newGScore <= neighbor.getgScore()) {
+					neighbor.setBestFrom(current);
+					neighbor.setgScore(newGScore);
+					neighbor.setfScore(neighbor.getgScore() + Node.distance(neighbor, goal));
 				}
 			}
 		}
@@ -193,7 +199,7 @@ public abstract class Unit {
 		double pathY = y;
 		
 		for(Point p: path) {
-			Line2D.Double line = new Line2D.Double(pathX, pathY, p.x, p.y);
+			Line2D.Double line = new Line2D.Double(pathX, pathY, p.getX(), p.getY());
 			for(Wall w: walls) {
 				if(w.collide(line)) {
 					Point target = path.removeLast();
@@ -220,11 +226,11 @@ public abstract class Unit {
 			Point p = path.getFirst();
 			double distanceToPoint = p.distanceTo(new Point(this.x, this.y));
 			if(distanceToPoint >= speed()) {
-				x += (p.x - x)/distanceToPoint*speed();
-				y += (p.y - y)/distanceToPoint*speed();
+				x += (p.getX() - x)/distanceToPoint*speed();
+				y += (p.getY() - y)/distanceToPoint*speed();
 			} else {
-				x = p.x;
-				y = p.y;
+				x = p.getX();
+				y = p.getY();
 				path.removeFirst();
 			}
 		}

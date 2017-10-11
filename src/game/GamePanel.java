@@ -1,3 +1,4 @@
+package game;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -17,6 +18,13 @@ import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 import javax.swing.event.MouseInputListener;
+
+import abstracts.Clock;
+import abstracts.Mesh;
+import abstracts.Point;
+import map.Wall;
+import units.Drone;
+import units.Unit;
 
 public class GamePanel extends JPanel implements MouseInputListener, KeyListener {
 
@@ -113,8 +121,8 @@ public class GamePanel extends JPanel implements MouseInputListener, KeyListener
 		int x = 10;
 		int y = 10;
 		String[] strings = new String[] { "***Controls***", "M:           Toggle mesh", "P:           Toggle path",
-				"Left click:  Set path", "", "***Metrics***", "Mesh points: " + mesh.points.size(),
-				"Connections: " + mesh.connections.size() };
+				"Left click:  Set path", "", "***Metrics***", "Mesh points: " + mesh.getPoints().size(),
+				"Connections: " + mesh.getConnections().size() };
 
 		g.setColor(Color.WHITE);
 		for (String s : strings) {

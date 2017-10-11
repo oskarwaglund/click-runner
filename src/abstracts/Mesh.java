@@ -1,15 +1,26 @@
+package abstracts;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.util.ArrayList;
 
+import map.Wall;
+
 public class Mesh {
 	
-	class Connection {
+	public class Connection {
 		int i1, i2;
 		
 		public Connection(int i1, int i2) {
 			this.i1 = i1;
 			this.i2 = i2;
+		}
+		
+		public int getI1() {
+			return i1;
+		}
+		
+		public int getI2() {
+			return i2;
 		}
 	}
 	
@@ -109,5 +120,13 @@ public class Mesh {
 		for(Point p: points) {
 			g.fillOval((int)p.x-2, (int)p.y-2, 4, 4);
 		}
+	}
+
+	public ArrayList<Point> getPoints() {
+		return points;
+	}
+
+	public ArrayList<Connection> getConnections() {
+		return connections;
 	}
 }

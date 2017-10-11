@@ -1,3 +1,6 @@
+package abstracts;
+import units.Unit;
+
 public class Vector {
 	double x, y;
 	
@@ -7,8 +10,8 @@ public class Vector {
 	}
 	
 	public Vector(Unit u1, Unit u2) {
-		this.x = u2.x - u1.x;
-		this.y = u2.y - u1.y;
+		this.x = u2.getX() - u1.getX();
+		this.y = u2.getY() - u1.getY();
 	}
 	
 	public Vector multiply(double a) {
@@ -32,6 +35,22 @@ public class Vector {
 		double xx = x/l;
 		double yy = y/l;
 		return new Vector(xx, yy);
+	}
+
+	public double getX() {
+		return x;
+	}
+
+	public void setX(double x) {
+		this.x = x;
+	}
+
+	public double getY() {
+		return y;
+	}
+
+	public void setY(double y) {
+		this.y = y;
 	}
 	
 }
