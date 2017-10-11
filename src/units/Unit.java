@@ -101,7 +101,7 @@ public abstract class Unit {
 		int tries = 0;
 		while(goal == null && tries < 5) {
 			double radius = Math.random();
-			radius *= radius * 20;
+			radius *= radius * 50;
 			double angle = Math.random() * 2 * Math.PI;
 			double x = target.getX() + Math.cos(angle)*radius;
 			double y = target.getY() + Math.sin(angle)*radius;

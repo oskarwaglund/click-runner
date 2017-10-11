@@ -39,7 +39,6 @@ public class GamePanel extends JPanel implements MouseInputListener, KeyListener
 
 	Rectangle selection;
 
-	static final int TIMER_DELAY = 20;
 	boolean showMesh;
 	boolean showPath;
 
@@ -50,11 +49,11 @@ public class GamePanel extends JPanel implements MouseInputListener, KeyListener
 
 		units = new ArrayList<>();
 		selectedUnits = new ArrayList<>();
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < 100; i++) {
 			units.add(new Drone(200 + (i/10) * 10, 200 + (i%10) * 10, 1));
 		}
 		
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < 100; i++) {
 			units.add(new Shooter(200 + (i/10) * 10, 500 + (i%10) * 10, 2));
 		}
 
@@ -68,7 +67,7 @@ public class GamePanel extends JPanel implements MouseInputListener, KeyListener
 				run();
 			}
 		};
-		new Timer(TIMER_DELAY, listener).start();
+		new Timer(Clock.FRAME_LENGTH, listener).start();
 	}
 
 	void run() {

@@ -18,7 +18,7 @@ public class Shooter extends Unit{
 	private static final int ATTACK_RANGE = 100;
 	private static final int ATTACK_DURATION = 1000/Clock.FRAME_LENGTH;
 	private static final int DAMAGE_FRAME = 10;
-	private static final int DAMAGE = 4;
+	private static final int DAMAGE = 3;
 	private static final int DEATH_TIME = 2000/Clock.FRAME_LENGTH;
 	
 	public Shooter(double x, double y) {
@@ -75,11 +75,9 @@ public class Shooter extends Unit{
 
 	@Override
 	public void paint(Graphics g, boolean showPath, boolean selected) {
-		if(!isDead() && attackTarget != null && attackCounter < DAMAGE_FRAME) {
-			final int bulletSize = 4;
-			Vector v = new Vector(this, attackTarget).multiply((double)attackCounter/DAMAGE_FRAME);
+		if(!isDead() && attackTarget != null && attackCounter == DAMAGE_FRAME) {
 			g.setColor(Color.BLACK);
-			g.fillOval((int)(x + v.getX()-bulletSize/2), (int)(y + v.getY()-bulletSize/2), bulletSize, bulletSize);
+			g.drawLine((int)x, (int)y, (int)attackTarget.x, (int)attackTarget.y);
 		}
 
 		if(isDead()) {
