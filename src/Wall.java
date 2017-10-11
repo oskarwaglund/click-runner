@@ -74,11 +74,14 @@ public class Wall extends Polygon{
 		return false;
 	}
 	
-	public boolean touchesOther(ArrayList<Wall> walls) {
+	public boolean touchesOther(ArrayList<Wall> walls, Hero hero) {
 		for(Wall w: walls) {
 			if(collide(w)){
 				return true;
 			}
+		}
+		if(contains(hero.x, hero.y)) {
+			return true;
 		}
 		return false;
 	}
@@ -94,9 +97,9 @@ public class Wall extends Polygon{
 		g.fillPolygon(this);
 	}
 	
-	public void paintEdit(Graphics g, ArrayList<Wall> walls) {
+	public void paintEdit(Graphics g, ArrayList<Wall> walls, Hero hero) {
 		Color color = Color.GREEN;
-		if(touchesOther(walls)) {
+		if(touchesOther(walls, hero)) {
 			color = Color.RED;
 		}
 		g.setColor(color);

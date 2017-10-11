@@ -31,9 +31,6 @@ target/
 *.ipr
 .idea/
 
-# eclipse project file
-.classpath
-
 # NetBeans specific
 nbproject/private/
 build/
@@ -52,3 +49,4 @@ nb-configuration.xml
 release.properties
 pom.xml.releaseBackup
 pom.xml.tag
+/bin/

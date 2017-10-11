@@ -1,5 +1,6 @@
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.geom.Line2D;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Set;
@@ -126,6 +127,23 @@ public class Hero{
 			}
 		}
 		return path;
+	}
+	
+	public void updatePath(Mesh mesh, ArrayList<Wall> walls) {
+		double pathX = x;
+		double pathY = y;
+		
+		for(Point p: path) {
+			Line2D.Double line = new Line2D.Double(pathX, pathY, p.x, p.y);
+			for(Wall w: walls) {
+				if(w.collide(line)) {
+					Point target = path.removeLast();
+					path.clear();
+					setPath(target, mesh, walls);
+					return;
+				}
+			}
+		}
 	}
 	
 	static double distance(Node n1, Node n2) {

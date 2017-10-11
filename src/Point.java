@@ -24,7 +24,18 @@ public class Point {
 	}
 	
 	public boolean sees(Point p, ArrayList<Wall> walls) {
-		Line2D.Double line = new Line2D.Double(x, y, p.x, p.y);
+		
+		//Create vector of length 1 from this point to p
+		double vX = p.x - x;
+		double vY = p.y - y;
+		
+		//Normalize
+		double vL = Math.hypot(vX, vY);
+		vX /= vL;
+		vY /= vL;
+		
+		Line2D.Double line = new Line2D.Double(x+vX, y+vY, p.x-vX, p.y-vY);
+		
 		for(Wall w: walls) {
 			if(w.collide(line)) {
 				return false;

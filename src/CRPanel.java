@@ -66,7 +66,7 @@ public class CRPanel extends JPanel implements MouseInputListener, KeyListener {
 		}
 		hero.paint(g, showPath);
 		if (editedWall != null) {
-			editedWall.paintEdit(g, walls);
+			editedWall.paintEdit(g, walls, hero);
 		}
 		
 		int x = 10;
@@ -129,7 +129,6 @@ public class CRPanel extends JPanel implements MouseInputListener, KeyListener {
 
 	@Override
 	public void keyPressed(KeyEvent arg0) {
-		// TODO Auto-generated method stub
 
 	}
 
@@ -143,9 +142,12 @@ public class CRPanel extends JPanel implements MouseInputListener, KeyListener {
 			showPath = !showPath;
 			break;
 		case KeyEvent.VK_ENTER:
-			if (editedWall != null && !editedWall.touchesOther(walls)) {
+			if (editedWall != null && !editedWall.touchesOther(walls, hero)) {
 				walls.add(editedWall);
 				editedWall = null;
+				
+				mesh=new Mesh(walls);
+				hero.updatePath(mesh, walls);
 			}
 			mesh = new Mesh(walls);
 			break;
@@ -157,13 +159,11 @@ public class CRPanel extends JPanel implements MouseInputListener, KeyListener {
 
 	@Override
 	public void keyTyped(KeyEvent arg0) {
-		// TODO Auto-generated method stub
 
 	}
 
 	@Override
 	public void mouseDragged(MouseEvent e) {
-		// TODO Auto-generated method stub
 
 	}
 
