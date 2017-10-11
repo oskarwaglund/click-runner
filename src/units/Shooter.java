@@ -1,4 +1,5 @@
 package units;
+
 import java.awt.Color;
 import java.awt.Graphics;
 
@@ -6,28 +7,28 @@ import abstracts.Clock;
 import abstracts.Point;
 import abstracts.Vector;
 
-public class Drone extends Unit{
+public class Shooter extends Unit{
 
-	private static final int MAX_HP = 20;
-	private static final int SPEED = 5; 
-	private static final int SIZE = 10;
+	private static final int MAX_HP = 10;
+	private static final int SPEED = 4; 
+	private static final int SIZE = 8;
 	
-	private static final int VISION_RANGE = 100;
+	private static final int VISION_RANGE = 130;
 	
-	private static final int ATTACK_RANGE = 10;
-	private static final int ATTACK_DURATION = 1000/Clock.FRAME_LENGTH; //1 second
+	private static final int ATTACK_RANGE = 100;
+	private static final int ATTACK_DURATION = 1000/Clock.FRAME_LENGTH;
 	private static final int DAMAGE_FRAME = 10;
-	private static final int DAMAGE = 3;
-	private static final int DEATH_TIME = 2000/Clock.FRAME_LENGTH; //2 seconds
+	private static final int DAMAGE = 4;
+	private static final int DEATH_TIME = 2000/Clock.FRAME_LENGTH;
 	
-	public Drone(double x, double y) {
+	public Shooter(double x, double y) {
 		super(x, y);
 	}
 	
-	public Drone(double x, double y, int team) {
+	public Shooter(double x, double y, int team) {
 		super(x, y, team);
 	}
-	
+
 	int getMaxHP() {
 		return MAX_HP;
 	}
@@ -72,20 +73,20 @@ public class Drone extends Unit{
 		return DEATH_TIME;
 	}
 
+	@Override
 	public void paint(Graphics g, boolean showPath, boolean selected) {
-		double x = this.x;
-		double y = this.y;
-		
-		if(!isDead() && attackTarget != null && attackCounter < DAMAGE_FRAME*2) {
-			Vector v = new Vector(this, attackTarget).multiply(0.5*Math.sin((double)attackCounter / DAMAGE_FRAME / 2 * Math.PI));
-			x += v.getX();
-			y += v.getY();
+		if(!isDead() && attackTarget != null && attackCounter < DAMAGE_FRAME) {
+			final int bulletSize = 4;
+			Vector v = new Vector(this, attackTarget).multiply((double)attackCounter/DAMAGE_FRAME);
+			g.setColor(Color.BLACK);
+			g.fillOval((int)(x + v.getX()-bulletSize/2), (int)(y + v.getY()-bulletSize/2), bulletSize, bulletSize);
 		}
 
 		if(isDead()) {
 			Color teamColor = TEAM_COLORS.get(team);
 			color = new Color(teamColor.getRed(), teamColor.getGreen(), teamColor.getBlue(), Math.max(0, 255-255*deadCounter/DEATH_TIME));
 		}
+		
 		g.setColor(color);
 		g.fillOval((int)(x - size()/2), (int)(y - size()/2), size(), size());
 		
@@ -107,4 +108,5 @@ public class Drone extends Unit{
 			paintHealthBar(g);
 		}
 	}
+
 }

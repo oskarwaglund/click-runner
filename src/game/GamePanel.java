@@ -24,6 +24,7 @@ import abstracts.Mesh;
 import abstracts.Point;
 import map.Wall;
 import units.Drone;
+import units.Shooter;
 import units.Unit;
 
 public class GamePanel extends JPanel implements MouseInputListener, KeyListener {
@@ -49,13 +50,13 @@ public class GamePanel extends JPanel implements MouseInputListener, KeyListener
 
 		units = new ArrayList<>();
 		selectedUnits = new ArrayList<>();
-		/*for (int i = 0; i < 100; i++) {
-			units.add(new Drone(200 + (i/10) * 10, 200 + (i%10) * 10 ));
-		}*/
+		for (int i = 0; i < 10; i++) {
+			units.add(new Drone(200 + (i/10) * 10, 200 + (i%10) * 10, 1));
+		}
 		
-		units.add(new Drone(100, 100, 1));
-		units.add(new Drone(100, 120, 1));
-		units.add(new Drone(100, 380, 2));
+		for (int i = 0; i < 10; i++) {
+			units.add(new Shooter(200 + (i/10) * 10, 500 + (i%10) * 10, 2));
+		}
 
 		selection = null;
 		walls = new ArrayList<>();
