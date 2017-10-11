@@ -6,23 +6,24 @@ import java.util.ArrayList;
 import java.util.Set;
 import java.util.TreeSet;
 
-public class Hero{
-
-	static final int SIZE = 10;
-	static final double JITTER = 0;
-	static final double SPEED = 5.0;
+public abstract class Unit {
+	
+	private final int MAX_HP = 0;
 	
 	double x, y;
-	double dx, dy; 
-		
+
+	abstract double speed();
+	abstract int size();
+	abstract int getMaxHP();
+	int hp;
+	
 	ArrayDeque<Point> path;
 	
-	
-	public Hero(double x, double y) {
+	public Unit(double x, double y) {
 		this.x = x;
 		this.y = y;
-		dx = 0;
-		dy = 0;
+		
+		hp = MAX_HP;
 		
 		path = new ArrayDeque<>();
 	}
@@ -45,18 +46,34 @@ public class Hero{
 		
 		Node start;
 		
-		if(path.size() == 0) {
-			start = new Node(x, y);
-		} else {
-			start = new Node(path.getLast().x, path.getLast().y);
+		start = new Node(x, y);
+		
+		Node goal = null;
+		int tries = 0;
+		while(goal == null && tries < 5) {
+			double radius = Math.random();
+			radius *= radius * 20;
+			double angle = Math.random() * 2 * Math.PI;
+			double x = target.x + Math.cos(angle)*radius;
+			double y = target.y + Math.sin(angle)*radius;
+			
+			for(Wall w: walls) {
+				if(w.contains(x, y)) {
+					continue;
+				}
+			}
+			goal = new Node(x, y);
+		}
+		if(goal == null) {
+			goal = new Node(target.x, target.y);
 		}
 		
-		Node goal = new Node(target.x, target.y);
 		
 		Point startPoint = new Point(start.x, start.y);
 		Point goalPoint = new Point(goal.x, goal.y);
 		
 		if(startPoint.sees(goalPoint, walls)) {
+			path.clear();
 			path.add(goalPoint);
 			return;
 		}
@@ -76,6 +93,7 @@ public class Hero{
 		if(!goalReachable) {
 			return;
 		}
+		path.clear();
 		path.addAll(aStar(start, goal));
 	}
 	
@@ -154,9 +172,9 @@ public class Hero{
 		if(path.size() > 0) {
 			Point p = path.getFirst();
 			double distanceToPoint = p.distanceTo(new Point(this.x, this.y));
-			if(distanceToPoint >= SPEED) {
-				x += (p.x - x)/distanceToPoint*SPEED;
-				y += (p.y - y)/distanceToPoint*SPEED;
+			if(distanceToPoint >= speed()) {
+				x += (p.x - x)/distanceToPoint*speed();
+				y += (p.y - y)/distanceToPoint*speed();
 			} else {
 				x = p.x;
 				y = p.y;
@@ -165,9 +183,9 @@ public class Hero{
 		}
 	}
 	
-	public void paint(Graphics g, boolean showPath) {
+	public void paint(Graphics g, boolean showPath, boolean selected) {
 		g.setColor(Color.RED);
-		g.fillOval((int)(x - SIZE/2 + Math.random() * JITTER*2 - JITTER), (int)(y - SIZE/2 + Math.random() * JITTER*2 - JITTER), SIZE, SIZE);
+		g.fillOval((int)(x - size()/2), (int)(y - size()/2), size(), size());
 		
 		if(showPath) {
 			g.setColor(Color.GREEN);
@@ -178,6 +196,11 @@ public class Hero{
 				lastX = (int)p.x;
 				lastY = (int)p.y;
 			}
+		}
+		
+		if(selected) {
+			g.setColor(Color.YELLOW);
+			g.fillOval((int)x-2, (int)(y-size()-10), 4, 4);
 		}
 		
 	}

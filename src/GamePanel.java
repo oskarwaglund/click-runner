@@ -21,22 +21,30 @@ import javax.swing.event.MouseInputListener;
 public class GamePanel extends JPanel implements MouseInputListener, KeyListener {
 
 	final static Color COLOR_SELECTION = new Color(100, 100, 100, 20);
-	
-	Hero hero;
+
 	Mesh mesh;
 	ArrayList<Wall> walls;
 
+	ArrayList<Unit> units;
+	ArrayList<Unit> selectedUnits;
+
 	Rectangle selection;
-	
+
 	static final int TIMER_DELAY = 20;
 	boolean showMesh;
 	boolean showPath;
-	
+
 	public GamePanel() {
 		setBackground(new Color(200, 200, 200));
 		addMouseListener(this);
 		addMouseMotionListener(this);
-		hero = new Hero(200, 400);
+
+		units = new ArrayList<>();
+		selectedUnits = new ArrayList<>();
+		for (int i = 0; i < 100; i++) {
+			units.add(new Drone(200, 200 + 30 * i));
+		}
+
 		selection = null;
 		walls = new ArrayList<>();
 		mesh = new Mesh(walls);
@@ -49,20 +57,22 @@ public class GamePanel extends JPanel implements MouseInputListener, KeyListener
 		};
 		new Timer(TIMER_DELAY, listener).start();
 	}
-	
+
 	void run() {
 		step();
 		paint();
 	}
 
 	void step() {
-		hero.step();
+		for (Unit u : units) {
+			u.step();
+		}
 	}
 
 	void paint() {
 		repaint();
 	}
-	
+
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		g.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
@@ -72,48 +82,44 @@ public class GamePanel extends JPanel implements MouseInputListener, KeyListener
 		if (showMesh) {
 			mesh.paint(g);
 		}
-		hero.paint(g, showPath);
-		
+
+		for (Unit u : units) {
+			u.paint(g, showPath, selectedUnits.contains(u));
+		}
+
 		int x = 10;
 		int y = 10;
-		String[] strings = new String[] {
-			"***Controls***",
-			"M:           Toggle mesh",
-			"P:           Toggle path",
-			"Left click:  Set path",
-			"",
-			"***Metrics***",
-			"Mesh points: " + mesh.points.size(),
-			"Connections: " + mesh.connections.size()
-		};
-		
+		String[] strings = new String[] { "***Controls***", "M:           Toggle mesh", "P:           Toggle path",
+				"Left click:  Set path", "", "***Metrics***", "Mesh points: " + mesh.points.size(),
+				"Connections: " + mesh.connections.size() };
+
 		g.setColor(Color.WHITE);
-		for(String s: strings) {
+		for (String s : strings) {
 			g.drawString(s, x, y);
 			y += g.getFontMetrics().getHeight();
 		}
-		
+
 		g.setColor(COLOR_SELECTION);
-		if(selection != null) {
+		if (selection != null) {
 			g.fillRect(selection.x, selection.y, selection.width, selection.height);
 		}
 	}
-	
+
 	void loadMap() {
 		JFileChooser fc = new JFileChooser();
 		int val = fc.showOpenDialog(this);
-		if(val == JFileChooser.APPROVE_OPTION) {
+		if (val == JFileChooser.APPROVE_OPTION) {
 			File file = fc.getSelectedFile();
 			ArrayList<Wall> walls = new ArrayList<>();
 			try {
 				BufferedReader br = new BufferedReader(new FileReader(file));
 				String line;
-				while((line = br.readLine()) != null) {
+				while ((line = br.readLine()) != null) {
 					String[] points = line.split(",");
 					Wall w = new Wall();
-					for(int i = 0; i < points.length/2; i++) {
-						int x = Integer.parseInt(points[2*i]);
-						int y = Integer.parseInt(points[2*i+1]);
+					for (int i = 0; i < points.length / 2; i++) {
+						int x = Integer.parseInt(points[2 * i]);
+						int y = Integer.parseInt(points[2 * i + 1]);
 						w.addPoint(x, y);
 					}
 					walls.add(w);
@@ -125,10 +131,22 @@ public class GamePanel extends JPanel implements MouseInputListener, KeyListener
 			}
 		}
 	}
-	
+
 	public void setWalls(ArrayList<Wall> walls) {
 		this.walls = walls;
 		mesh = new Mesh(walls);
+	}
+
+	void selectUnits() {
+		if (selection == null) {
+			return;
+		}
+		selectedUnits.clear();
+		for (Unit u : units) {
+			if (selection.contains(u.x, u.y)) {
+				selectedUnits.add(u);
+			}
+		}
 	}
 
 	@Override
@@ -148,19 +166,26 @@ public class GamePanel extends JPanel implements MouseInputListener, KeyListener
 
 	@Override
 	public void mousePressed(MouseEvent e) {
-		selection = new Rectangle(e.getX(), e.getY(), 0, 0);
+		switch (e.getButton()) {
+		case MouseEvent.BUTTON1:
+			selection = new Rectangle(e.getX(), e.getY(), 0, 0);
+			break;
+		}
 	}
 
 	@Override
 	public void mouseReleased(MouseEvent e) {
 		switch (e.getButton()) {
 		case MouseEvent.BUTTON1:
-			if(selection != null) {
+			if (selection != null) {
+				selectUnits();
 				selection = null;
 			}
 			break;
 		case MouseEvent.BUTTON3:
-			hero.setPath(new Point(e.getX(), e.getY()), mesh, walls);
+			for (Unit u : selectedUnits) {
+				u.setPath(new Point(e.getX(), e.getY()), mesh, walls);
+			}
 			break;
 		}
 
@@ -170,7 +195,7 @@ public class GamePanel extends JPanel implements MouseInputListener, KeyListener
 	public void keyPressed(KeyEvent arg0) {
 
 	}
-	
+
 	@Override
 	public void keyReleased(KeyEvent e) {
 		switch (e.getKeyCode()) {
@@ -184,7 +209,7 @@ public class GamePanel extends JPanel implements MouseInputListener, KeyListener
 			loadMap();
 			break;
 		case KeyEvent.VK_ESCAPE:
-			
+
 		}
 	}
 
@@ -195,13 +220,13 @@ public class GamePanel extends JPanel implements MouseInputListener, KeyListener
 
 	@Override
 	public void mouseDragged(MouseEvent e) {
-		if(selection != null) {
+		if (selection != null) {
 			selection.setFrame(selection.x, selection.y, e.getX() - selection.x, e.getY() - selection.y);
 		}
 	}
 
 	@Override
 	public void mouseMoved(MouseEvent e) {
-		
+
 	}
 }

@@ -83,7 +83,7 @@ public class Wall extends Polygon{
 		return false;
 	}
 	
-	public boolean touchesHero(Hero hero) {
+	public boolean touchesHero(Drone hero) {
 		if(contains(hero.x, hero.y)) {
 			return true;
 		}
@@ -106,7 +106,7 @@ public class Wall extends Polygon{
 		}	
 	}
 	
-	public void paintEdit(Graphics g, ArrayList<Wall> walls, Hero hero) {
+	public void paintEdit(Graphics g, ArrayList<Wall> walls, Drone hero) {
 		Color color = Color.GREEN;
 		
 		if(walls != null && touchesWall(walls)) {
