@@ -18,6 +18,7 @@ import javax.swing.Timer;
 import javax.swing.event.MouseInputListener;
 
 import abstracts.Clock;
+import abstracts.KDTree;
 import abstracts.Mesh;
 import abstracts.Point;
 import abstracts.Selection;
@@ -30,6 +31,8 @@ import units.Unit;
 public class GamePanel extends JPanel implements MouseInputListener, KeyListener {
 
 	Mesh mesh;
+
+	KDTree tree;
 	ArrayList<Wall> walls;
 
 	ArrayList<Unit> units;
@@ -84,24 +87,34 @@ public class GamePanel extends JPanel implements MouseInputListener, KeyListener
 	}
 
 	void stepUnits() {
-		for (Unit u1 : units) {
-			if(u1.getAttackTarget() == null) {
-				Unit target = null;
-				double closestDistance = u1.visionRange()*u1.visionRange();
-				for (Unit u2 : units) {
-					if(u1.getTeam() == u2.getTeam() || u2.isDead() || !u1.sees(u2, walls)) {
-						continue;
-					}
-					double distance = u1.squaredDistanceTo(u2);
-					if(distance <= closestDistance) {
-						closestDistance = distance;
-						target = u2;
-					}
+		boolean useKD = false;
+		if(useKD) {
+			tree = new KDTree(units);
+			for(Unit u: units) {
+				if(u.getAttackTarget() == null) {
+					u.setAttackTarget(tree.getClosestEnemy(u));
 				}
-				u1.setAttackTarget(target);
+			}
+		} else {
+			for (Unit u1 : units) {
+				if(u1.getAttackTarget() == null) {
+					Unit target = null;
+					double closestDistance = u1.visionRange()*u1.visionRange();
+					for (Unit u2 : units) {
+						if(u1.getTeam() == u2.getTeam() || u2.isDead() || !u1.sees(u2, walls)) {
+							continue;
+						}
+						double distance = u1.squaredDistanceTo(u2);
+						if(distance <= closestDistance) {
+							closestDistance = distance;
+							target = u2;
+						}
+					}
+					u1.setAttackTarget(target);
+				}
 			}
 		}
-		
+
 		for (Unit u : units) {
 			u.step();
 		}
@@ -150,6 +163,10 @@ public class GamePanel extends JPanel implements MouseInputListener, KeyListener
 
 		if(selection != null) {
 			selection.paint(g);
+		}
+		
+		if(tree != null) {
+			tree.paint(g);
 		}
 	}
 
