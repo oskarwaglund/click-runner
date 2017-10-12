@@ -1,7 +1,6 @@
 package game;
 import java.awt.Font;
 import java.awt.Graphics;
-import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -21,6 +20,7 @@ import javax.swing.event.MouseInputListener;
 import abstracts.Clock;
 import abstracts.Mesh;
 import abstracts.Point;
+import abstracts.Selection;
 import map.Colors;
 import map.Wall;
 import units.Drone;
@@ -35,10 +35,9 @@ public class GamePanel extends JPanel implements MouseInputListener, KeyListener
 	ArrayList<Unit> units;
 	ArrayList<Unit> selectedUnits;
 
-	Rectangle selection;
+	Selection selection;
 
 	boolean showMesh;
-	boolean showPath;
 
 	long logicLength;
 	long paintLength;
@@ -133,8 +132,8 @@ public class GamePanel extends JPanel implements MouseInputListener, KeyListener
 		String[] strings = new String[] { 
 				"***Controls***", 
 				"M:            Toggle mesh", 
-				"P:            Toggle path",
-				"Left click:   Set path", 
+				"Left click:   Select units",
+				"Right click:  Set path", 
 				"", 
 				"***Metrics***", 
 				"Mesh points:  " + mesh.getPoints().size(),
@@ -149,9 +148,8 @@ public class GamePanel extends JPanel implements MouseInputListener, KeyListener
 			y += g.getFontMetrics().getHeight();
 		}
 
-		if (selection != null) {
-			g.setColor(Colors.SELECTION);
-			g.fillRect(selection.x, selection.y, selection.width, selection.height);
+		if(selection != null) {
+			selection.paint(g);
 		}
 	}
 
@@ -192,7 +190,7 @@ public class GamePanel extends JPanel implements MouseInputListener, KeyListener
 		}
 		selectedUnits.clear();
 		for (Unit u : units) {
-			if (selection.contains(u.getX(), u.getY())) {
+			if (selection.contains((int)u.getX(), (int)u.getY())) {
 				selectedUnits.add(u);
 			}
 		}
@@ -217,7 +215,7 @@ public class GamePanel extends JPanel implements MouseInputListener, KeyListener
 	public void mousePressed(MouseEvent e) {
 		switch (e.getButton()) {
 		case MouseEvent.BUTTON1:
-			selection = new Rectangle(e.getX(), e.getY(), 0, 0);
+			selection = new Selection(e.getX(), e.getY());
 			break;
 		}
 	}
@@ -251,9 +249,6 @@ public class GamePanel extends JPanel implements MouseInputListener, KeyListener
 		case KeyEvent.VK_M:
 			showMesh = !showMesh;
 			break;
-		case KeyEvent.VK_P:
-			showPath = !showPath;
-			break;
 		case KeyEvent.VK_L:
 			loadMap();
 			break;
@@ -268,7 +263,7 @@ public class GamePanel extends JPanel implements MouseInputListener, KeyListener
 	@Override
 	public void mouseDragged(MouseEvent e) {
 		if (selection != null) {
-			selection.setFrame(selection.x, selection.y, e.getX() - selection.x, e.getY() - selection.y);
+			selection.mouseUpdate(e.getX(), e.getY());
 		}
 	}
 
