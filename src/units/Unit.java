@@ -264,6 +264,12 @@ public abstract class Unit {
 	public double distanceTo(Unit u) {
 		return Math.hypot(u.x - x, u.y - y);
 	}
+	
+	public double squaredDistanceTo(Unit u) {
+		double dX = x - u.x;
+		double dY = y - u.y;
+		return dX*dX + dY*dY; 
+	}
 
 	public boolean sees(Unit u, ArrayList<Wall> walls) {
 		Line2D.Double line = new Line2D.Double(x, y, u.x, u.y);

@@ -60,6 +60,7 @@ public class GamePanel extends JPanel implements MouseInputListener, KeyListener
 
 		selection = null;
 		walls = new ArrayList<>();
+		loadMap();
 		mesh = new Mesh(walls);
 
 		addKeyListener(this);
@@ -87,12 +88,12 @@ public class GamePanel extends JPanel implements MouseInputListener, KeyListener
 		for (Unit u1 : units) {
 			if(u1.getAttackTarget() == null) {
 				Unit target = null;
-				double closestDistance = u1.visionRange();
+				double closestDistance = u1.visionRange()*u1.visionRange();
 				for (Unit u2 : units) {
 					if(u1.getTeam() == u2.getTeam() || u2.isDead() || !u1.sees(u2, walls)) {
 						continue;
 					}
-					double distance = u1.distanceTo(u2);
+					double distance = u1.squaredDistanceTo(u2);
 					if(distance <= closestDistance) {
 						closestDistance = distance;
 						target = u2;
@@ -159,7 +160,7 @@ public class GamePanel extends JPanel implements MouseInputListener, KeyListener
 		int val = fc.showOpenDialog(this);
 		if (val == JFileChooser.APPROVE_OPTION) {
 			File file = fc.getSelectedFile();
-			ArrayList<Wall> walls = new ArrayList<>();
+			walls.clear();
 			try {
 				BufferedReader br = new BufferedReader(new FileReader(file));
 				String line;
@@ -174,7 +175,6 @@ public class GamePanel extends JPanel implements MouseInputListener, KeyListener
 					walls.add(w);
 				}
 				br.close();
-				setWalls(walls);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
