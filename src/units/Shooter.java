@@ -5,7 +5,7 @@ import java.awt.Graphics;
 
 import abstracts.Clock;
 import abstracts.Point;
-import abstracts.Vector;
+import map.Colors;
 
 public class Shooter extends Unit{
 
@@ -74,37 +74,14 @@ public class Shooter extends Unit{
 	}
 
 	@Override
-	public void paint(Graphics g, boolean showPath, boolean selected) {
-		if(!isDead() && attackTarget != null && attackCounter == DAMAGE_FRAME) {
-			g.setColor(Color.BLACK);
+	public void paintUnit(Graphics g) {
+		if(attackTarget != null && attackCounter == DAMAGE_FRAME) {
+			g.setColor(Colors.SHOOTER_SHOT);
 			g.drawLine((int)x, (int)y, (int)attackTarget.x, (int)attackTarget.y);
-		}
-
-		if(isDead()) {
-			Color teamColor = TEAM_COLORS.get(team);
-			color = new Color(teamColor.getRed(), teamColor.getGreen(), teamColor.getBlue(), Math.max(0, 255-255*deadCounter/DEATH_TIME));
 		}
 		
 		g.setColor(color);
 		g.fillOval((int)(x - size()/2), (int)(y - size()/2), size(), size());
-		
-		if(isDead()) {
-			return;
-		}
-		if(showPath) {
-			g.setColor(Color.GREEN);
-			int lastX = (int)x;
-			int lastY = (int)y;
-			for(Point p: path) {
-				g.drawLine(lastX, lastY, (int)p.getX(), (int)p.getY());
-				lastX = (int)p.getX();
-				lastY = (int)p.getY();
-			}
-		}
-		
-		if(selected) {
-			paintHealthBar(g);
-		}
 	}
 
 }

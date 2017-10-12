@@ -1,5 +1,4 @@
 package game;
-import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
@@ -17,6 +16,7 @@ import javax.swing.JPanel;
 import javax.swing.Timer;
 import javax.swing.event.MouseInputListener;
 
+import map.Colors;
 import map.Wall;
 
 public class EditPanel extends JPanel implements MouseInputListener, KeyListener {
@@ -29,7 +29,7 @@ public class EditPanel extends JPanel implements MouseInputListener, KeyListener
 	static final int TIMER_DELAY = 20;
 
 	public EditPanel(GamePanel gamePanel) {
-		setBackground(new Color(200, 200, 200));
+		setBackground(Colors.BACKGROUND);
 		addMouseListener(this);
 		addMouseMotionListener(this);
 
@@ -64,7 +64,7 @@ public class EditPanel extends JPanel implements MouseInputListener, KeyListener
 				"***Controls***", 
 				"Left click:  Create wall"};
 
-		g.setColor(Color.WHITE);
+		g.setColor(Colors.TEXT);
 		for (String s : strings) {
 			g.drawString(s, x, y);
 			y += g.getFontMetrics().getHeight();

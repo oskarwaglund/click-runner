@@ -1,8 +1,8 @@
 package abstracts;
-import java.awt.Color;
 import java.awt.Graphics;
 import java.util.ArrayList;
 
+import map.Colors;
 import map.Wall;
 
 public class Mesh {
@@ -111,12 +111,12 @@ public class Mesh {
 	}
 	
 	public void paint(Graphics g) {
-		g.setColor(Color.BLUE);
+		g.setColor(Colors.MESH);
 		for(Connection c: connections) {
 			g.drawLine((int)points.get(c.i1).x, (int)points.get(c.i1).y, (int)points.get(c.i2).x, (int)points.get(c.i2).y);
 		}
 		
-		g.setColor(Color.YELLOW);
+		g.setColor(Colors.MESH_POINT);
 		for(Point p: points) {
 			g.fillOval((int)p.x-2, (int)p.y-2, 4, 4);
 		}

@@ -110,13 +110,13 @@ public class Wall extends Polygon{
 	}
 	
 	public void paint(Graphics g) {
-		paint(g, new Color(100, 100, 100));
+		paint(g, Colors.WALL);
 	}
 	
 	public void paintEdit(Graphics g) {
-		paint(g, Color.GREEN);
+		paint(g, Colors.WALL_EDIT);
 		
-		g.setColor(Color.WHITE);
+		g.setColor(Colors.TEXT);
 		g.drawString("ESC:         Quit", xpoints[npoints-1] + 10, ypoints[npoints-1]);
 		g.drawString("Left click:  Place point", xpoints[npoints-1] + 10, ypoints[npoints-1] + 10);
 		g.drawString("Right click: Confirm", xpoints[npoints-1] + 10, ypoints[npoints-1] + 20);

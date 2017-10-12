@@ -1,5 +1,4 @@
 package game;
-import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Rectangle;
@@ -22,14 +21,13 @@ import javax.swing.event.MouseInputListener;
 import abstracts.Clock;
 import abstracts.Mesh;
 import abstracts.Point;
+import map.Colors;
 import map.Wall;
 import units.Drone;
 import units.Shooter;
 import units.Unit;
 
 public class GamePanel extends JPanel implements MouseInputListener, KeyListener {
-
-	final static Color COLOR_SELECTION = new Color(100, 100, 100, 20);
 
 	Mesh mesh;
 	ArrayList<Wall> walls;
@@ -42,8 +40,11 @@ public class GamePanel extends JPanel implements MouseInputListener, KeyListener
 	boolean showMesh;
 	boolean showPath;
 
+	long logicLength;
+	long paintLength;
+	
 	public GamePanel() {
-		setBackground(new Color(200, 200, 200));
+		setBackground(Colors.BACKGROUND);
 		addMouseListener(this);
 		addMouseMotionListener(this);
 
@@ -71,9 +72,15 @@ public class GamePanel extends JPanel implements MouseInputListener, KeyListener
 	}
 
 	void run() {
+		long start = System.currentTimeMillis();
 		stepUnits();
 		Clock.tick();
+		long mid = System.currentTimeMillis();
 		repaint();
+		long stop = System.currentTimeMillis();
+		
+		logicLength = mid - start;
+		paintLength = stop - mid;
 	}
 
 	void stepUnits() {
@@ -82,7 +89,9 @@ public class GamePanel extends JPanel implements MouseInputListener, KeyListener
 				Unit target = null;
 				double closestDistance = u1.visionRange();
 				for (Unit u2 : units) {
-					if(u1.getTeam() == u2.getTeam() || u2.isDead() || !u1.sees(u2, walls)) continue;
+					if(u1.getTeam() == u2.getTeam() || u2.isDead() || !u1.sees(u2, walls)) {
+						continue;
+					}
 					double distance = u1.distanceTo(u2);
 					if(distance <= closestDistance) {
 						closestDistance = distance;
@@ -106,32 +115,41 @@ public class GamePanel extends JPanel implements MouseInputListener, KeyListener
 
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
-		g.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
 		for (Wall w : walls) {
 			w.paint(g);
 		}
+		
 		if (showMesh) {
 			mesh.paint(g);
 		}
 
 		for (Unit u : units) {
-			u.paint(g, showPath, selectedUnits.contains(u));
+			u.paint(g, selectedUnits.contains(u));
 		}
 
 		int x = 10;
 		int y = 10;
-		String[] strings = new String[] { "***Controls***", "M:           Toggle mesh", "P:           Toggle path",
-				"Left click:  Set path", "", "***Metrics***", "Mesh points: " + mesh.getPoints().size(),
-				"Connections: " + mesh.getConnections().size() };
+		String[] strings = new String[] { 
+				"***Controls***", 
+				"M:            Toggle mesh", 
+				"P:            Toggle path",
+				"Left click:   Set path", 
+				"", 
+				"***Metrics***", 
+				"Mesh points:  " + mesh.getPoints().size(),
+				"Connections:  " + mesh.getConnections().size(),
+				"Logic length: " + logicLength + " ms",
+				"Paint length: " + paintLength + " ms"};
 
-		g.setColor(Color.WHITE);
+		g.setColor(Colors.TEXT);
+		g.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
 		for (String s : strings) {
 			g.drawString(s, x, y);
 			y += g.getFontMetrics().getHeight();
 		}
 
-		g.setColor(COLOR_SELECTION);
 		if (selection != null) {
+			g.setColor(Colors.SELECTION);
 			g.fillRect(selection.x, selection.y, selection.width, selection.height);
 		}
 	}
@@ -239,8 +257,6 @@ public class GamePanel extends JPanel implements MouseInputListener, KeyListener
 		case KeyEvent.VK_L:
 			loadMap();
 			break;
-		case KeyEvent.VK_ESCAPE:
-
 		}
 	}
 
