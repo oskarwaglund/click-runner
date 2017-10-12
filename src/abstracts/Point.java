@@ -26,19 +26,18 @@ public class Point {
 		return Math.hypot(p.x - x, p.y - y);
 	}
 	
+	public double squaredDistanceTo(Point p) {
+		double dX = p.x - x;
+		double dY = p.y - y;
+		return dX*dX + dY*dY;
+	}
+	
 	public boolean sees(Point p, ArrayList<Wall> walls) {
 		
 		//Create vector of length 1 from this point to p
-		double vX = p.x - x;
-		double vY = p.y - y;
+		Vector v = new Vector(this, p).normalize();		
 		
-		//Normalize
-		double vL = Math.hypot(vX, vY);
-		vX /= vL;
-		vY /= vL;
-		
-		Line2D.Double line = new Line2D.Double(x+vX, y+vY, p.x-vX, p.y-vY);
-		
+		Line2D.Double line = new Line2D.Double(x+v.getX(), y+v.getY(), p.x-v.getX(), p.y-v.getY());
 		for(Wall w: walls) {
 			if(w.collide(line)) {
 				return false;

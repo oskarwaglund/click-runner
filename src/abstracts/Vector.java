@@ -14,6 +14,11 @@ public class Vector {
 		this.y = u2.getY() - u1.getY();
 	}
 	
+	public Vector(Point p1, Point p2) {
+		this.x = p2.getX() - p1.getX();
+		this.y = p2.getY() - p1.getY();
+	}
+	
 	public Vector multiply(double a) {
 		return new Vector(x*a, y*a);
 	}
