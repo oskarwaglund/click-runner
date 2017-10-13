@@ -65,6 +65,12 @@ public class GamePanel extends JPanel implements MouseInputListener, KeyListener
 			addUnit(new Shooter(200 + (i / 10) * 10, 500 + (i % 10) * 10, 2));
 		}
 
+		for (int i = 0; i < 100; i++) {
+			addUnit(Math.random() < 0.5 ?
+					new Drone(200 + (i / 10) * 10, 800 + (i % 10) * 10, 3) :
+					new Shooter(200 + (i / 10) * 10, 800 + (i % 10) * 10, 3));
+		}
+		
 		selection = null;
 		walls = new ArrayList<>();
 		loadMap();
@@ -148,10 +154,6 @@ public class GamePanel extends JPanel implements MouseInputListener, KeyListener
 
 		if (selection != null) {
 			selection.paint(g);
-		}
-
-		if (tree != null) {
-			tree.paint(g);
 		}
 	}
 

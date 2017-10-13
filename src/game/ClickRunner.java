@@ -6,12 +6,7 @@ public class ClickRunner {
 	public static void main(String[] args) {
 		JFrame gameWindow = new JFrame("ClickRunner: Game");
 		GamePanel gameContent = new GamePanel();
-		gameWindow.setContentPane(gameContent);
-		gameWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		gameWindow.setVisible(true);
-		gameWindow.setExtendedState(JFrame.MAXIMIZED_BOTH); 
 		
-		/*
 		
 		JFrame editWindow = new JFrame("ClickRunner: Editor");
 		EditPanel editContent = new EditPanel(gameContent);
@@ -20,6 +15,9 @@ public class ClickRunner {
 		editWindow.setVisible(true);
 		editWindow.setExtendedState(JFrame.MAXIMIZED_BOTH); 
 		
-		*/
+		gameWindow.setContentPane(gameContent);
+		gameWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		gameWindow.setVisible(true);
+		gameWindow.setExtendedState(JFrame.MAXIMIZED_BOTH); 
 	}
 }
