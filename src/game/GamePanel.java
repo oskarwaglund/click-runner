@@ -99,8 +99,7 @@ public class GamePanel extends JPanel implements MouseInputListener, KeyListener
 
 	void stepUnits() {
 		for (int team : teams) {
-			tree = new KDTree(
-					units.stream().filter(u -> u.getTeam() != team && !u.isDead()).collect(Collectors.toList()));
+			tree = new KDTree(units.stream().filter(u -> u.getTeam() != team && !u.isDead()).collect(Collectors.toList()), walls);
 			for (Unit u : units.stream().filter(u -> u.getTeam() == team && !u.isDead()).collect(Collectors.toList())) {
 				if (u.getAttackTarget() == null) {
 					u.setAttackTarget(tree.getClosestEnemy(u));

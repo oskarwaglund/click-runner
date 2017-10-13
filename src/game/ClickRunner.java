@@ -7,7 +7,6 @@ public class ClickRunner {
 		JFrame gameWindow = new JFrame("ClickRunner: Game");
 		GamePanel gameContent = new GamePanel();
 		
-		
 		JFrame editWindow = new JFrame("ClickRunner: Editor");
 		EditPanel editContent = new EditPanel(gameContent);
 		editWindow.setContentPane(editContent);

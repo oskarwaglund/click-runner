@@ -2,9 +2,11 @@ package abstracts;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import map.Wall;
 import units.Unit;
 
 public class KDTree {
@@ -43,7 +45,8 @@ public class KDTree {
 	Node root;
 	Unit closestUnit;
 	double bestDistance;
-
+	ArrayList<Wall> walls;
+	
 	static XComparator xC = new XComparator();
 	static YComparator yC = new YComparator();
 
@@ -117,7 +120,7 @@ public class KDTree {
 		void checkBetter(Unit u) {
 			if (unit != null) {
 				double distance = u.distanceTo(unit);
-				if (!unit.isDead() && distance <= bestDistance) {
+				if (!unit.isDead() && distance <= bestDistance && u.sees(unit, KDTree.this.walls)) {
 					bestDistance = distance;
 					closestUnit = unit;
 				}
@@ -152,9 +155,10 @@ public class KDTree {
 
 	}
 
-	public KDTree(List<Unit> units) {
+	public KDTree(List<Unit> units, ArrayList<Wall> walls) {
 		root = new Node();
 		root.insert(units, 0);
+		this.walls = walls;
 	}
 
 	public void paint(Graphics g) {
