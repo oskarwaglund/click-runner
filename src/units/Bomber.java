@@ -5,6 +5,7 @@ import java.awt.Graphics;
 
 import abstracts.Clock;
 import abstracts.Vector;
+import media.SoundPlayer;
 
 public class Bomber extends Unit {
 
@@ -84,6 +85,7 @@ public class Bomber extends Unit {
 	@Override
 	void attackFunction(Unit u) {
 		u.hp -= DAMAGE;
+		SoundPlayer.playSound(SoundPlayer.SoundEnum.BOMBER_BLAST);
 	}
 	
 	@Override

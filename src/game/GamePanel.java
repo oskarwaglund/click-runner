@@ -28,6 +28,7 @@ import abstracts.Point;
 import abstracts.Selection;
 import map.Colors;
 import map.Wall;
+import media.SoundPlayer;
 import units.Bomber;
 import units.Drone;
 import units.Shooter;
@@ -50,6 +51,8 @@ public class GamePanel extends JPanel implements MouseInputListener, KeyListener
 	long logicLength;
 	long paintLength;
 
+	boolean ctrlPressed;
+
 	public GamePanel() {
 		setBackground(Colors.BACKGROUND);
 		addMouseListener(this);
@@ -67,17 +70,18 @@ public class GamePanel extends JPanel implements MouseInputListener, KeyListener
 		}
 
 		for (int i = 0; i < 100; i++) {
-			addUnit(Math.random() < 0.5 ?
-					new Drone(200 + (i / 10) * 10, 800 + (i % 10) * 10, 3) :
-					new Shooter(200 + (i / 10) * 10, 800 + (i % 10) * 10, 3));
+			addUnit(Math.random() < 0.5 ? new Drone(200 + (i / 10) * 10, 800 + (i % 10) * 10, 3)
+					: new Shooter(200 + (i / 10) * 10, 800 + (i % 10) * 10, 3));
 		}
-		
+
 		addUnit(new Bomber(200, 190, 1));
-		
+
 		selection = null;
 		walls = new ArrayList<>();
-		loadMap();
+		loadMap("maps\\Mini.txt");
 		mesh = new Mesh(walls);
+
+		ctrlPressed = false;
 
 		addKeyListener(this);
 		ActionListener listener = new ActionListener() {
@@ -86,6 +90,7 @@ public class GamePanel extends JPanel implements MouseInputListener, KeyListener
 			}
 		};
 		new Timer(Clock.FRAME_LENGTH, listener).start();
+		SoundPlayer.playSound(SoundPlayer.SoundEnum.THEME);
 	}
 
 	void run() {
@@ -102,7 +107,8 @@ public class GamePanel extends JPanel implements MouseInputListener, KeyListener
 
 	void stepUnits() {
 		for (int team : teams) {
-			tree = new KDTree(units.stream().filter(u -> u.getTeam() != team && !u.isDead()).collect(Collectors.toList()), walls);
+			tree = new KDTree(
+					units.stream().filter(u -> u.getTeam() != team && !u.isDead()).collect(Collectors.toList()), walls);
 			for (Unit u : units.stream().filter(u -> u.getTeam() == team && !u.isDead()).collect(Collectors.toList())) {
 				if (u.getAttackTarget() == null) {
 					u.setAttackTarget(tree.getClosestEnemy(u));
@@ -165,24 +171,32 @@ public class GamePanel extends JPanel implements MouseInputListener, KeyListener
 		int val = fc.showOpenDialog(this);
 		if (val == JFileChooser.APPROVE_OPTION) {
 			File file = fc.getSelectedFile();
-			walls.clear();
-			try {
-				BufferedReader br = new BufferedReader(new FileReader(file));
-				String line;
-				while ((line = br.readLine()) != null) {
-					String[] points = line.split(",");
-					Wall w = new Wall();
-					for (int i = 0; i < points.length / 2; i++) {
-						int x = Integer.parseInt(points[2 * i]);
-						int y = Integer.parseInt(points[2 * i + 1]);
-						w.addPoint(x, y);
-					}
-					walls.add(w);
+			loadMap(file);
+		}
+	}
+
+	void loadMap(String s) {
+		loadMap(new File(s));
+	}
+
+	void loadMap(File file) {
+		walls.clear();
+		try {
+			BufferedReader br = new BufferedReader(new FileReader(file));
+			String line;
+			while ((line = br.readLine()) != null) {
+				String[] points = line.split(",");
+				Wall w = new Wall();
+				for (int i = 0; i < points.length / 2; i++) {
+					int x = Integer.parseInt(points[2 * i]);
+					int y = Integer.parseInt(points[2 * i + 1]);
+					w.addPoint(x, y);
 				}
-				br.close();
-			} catch (IOException e) {
-				e.printStackTrace();
+				walls.add(w);
 			}
+			br.close();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -246,8 +260,11 @@ public class GamePanel extends JPanel implements MouseInputListener, KeyListener
 	}
 
 	@Override
-	public void keyPressed(KeyEvent arg0) {
-
+	public void keyPressed(KeyEvent e) {
+		switch (e.getKeyCode()) {
+		case KeyEvent.VK_CONTROL:
+			ctrlPressed = true;
+		}
 	}
 
 	@Override
@@ -259,6 +276,8 @@ public class GamePanel extends JPanel implements MouseInputListener, KeyListener
 		case KeyEvent.VK_L:
 			loadMap();
 			break;
+		case KeyEvent.VK_CONTROL:
+			ctrlPressed = false;
 		}
 	}
 

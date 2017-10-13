@@ -3,6 +3,7 @@ import java.awt.Graphics;
 
 import abstracts.Clock;
 import abstracts.Vector;
+import media.SoundPlayer;
 
 public class Drone extends Unit{
 
@@ -79,6 +80,7 @@ public class Drone extends Unit{
 	@Override
 	void attackFunction(Unit u) {
 		u.hp -= DAMAGE;
+		SoundPlayer.playSound(SoundPlayer.SoundEnum.DRONE_HIT);
 	}
 	
 	@Override
