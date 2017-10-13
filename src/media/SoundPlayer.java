@@ -1,6 +1,5 @@
 package media;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 import java.util.TreeMap;
@@ -22,18 +21,18 @@ public class SoundPlayer {
 	}
 
 	private static class Sound {
-		File file;
+		String resourceName;
 		long nextPlayTime;
 		
-		Sound(File file){
-			this.file = file;
+		Sound(String resourceName){
+			this.resourceName = resourceName;
 		}
 		
 		void play() {
 			if(System.currentTimeMillis() >= nextPlayTime) {
 				try {
 					Clip clip = AudioSystem.getClip();
-					AudioInputStream ais = AudioSystem.getAudioInputStream(file);
+					AudioInputStream ais = AudioSystem.getAudioInputStream(Sound.class.getClassLoader().getResource(resourceName));
 					clip.open(ais);
 					clip.start();
 					nextPlayTime = System.currentTimeMillis() + PLAY_DELAY;
@@ -47,14 +46,14 @@ public class SoundPlayer {
 	static Map<SoundEnum, Sound> sounds;
 	static {
 		sounds = new TreeMap<>();
-		addSound(SoundEnum.DRONE_HIT, "sounds\\hit.wav");
-		addSound(SoundEnum.SHOOTER_SHOT, "sounds\\shot.wav");
-		addSound(SoundEnum.THEME, "sounds\\waterloo.wav");
-		addSound(SoundEnum.BOMBER_BLAST, "sounds\\blast.wav");
+		addSound(SoundEnum.DRONE_HIT, "hit.wav");
+		addSound(SoundEnum.SHOOTER_SHOT, "shot.wav");
+		addSound(SoundEnum.THEME, "waterloo.wav");
+		addSound(SoundEnum.BOMBER_BLAST, "blast.wav");
 	}
 	
 	public static void addSound(SoundEnum sound, String fileName) {
-		sounds.put(sound, new Sound(new File(fileName)));
+		sounds.put(sound, new Sound(fileName));
 	}
 
 	public static void playSound(SoundEnum sound) {

@@ -11,6 +11,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.TreeSet;
@@ -78,7 +80,7 @@ public class GamePanel extends JPanel implements MouseInputListener, KeyListener
 
 		selection = null;
 		walls = new ArrayList<>();
-		loadMap("maps\\Mini.txt");
+		loadMap("/Mini.txt");
 		mesh = new Mesh(walls);
 
 		ctrlPressed = false;
@@ -176,7 +178,25 @@ public class GamePanel extends JPanel implements MouseInputListener, KeyListener
 	}
 
 	void loadMap(String s) {
-		loadMap(new File(s));
+		InputStream in = getClass().getResourceAsStream(s); 
+		walls.clear();
+		try {
+			BufferedReader br = new BufferedReader(new InputStreamReader(in));
+			String line;
+			while ((line = br.readLine()) != null) {
+				String[] points = line.split(",");
+				Wall w = new Wall();
+				for (int i = 0; i < points.length / 2; i++) {
+					int x = Integer.parseInt(points[2 * i]);
+					int y = Integer.parseInt(points[2 * i + 1]);
+					w.addPoint(x, y);
+				}
+				walls.add(w);
+			}
+			br.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}	
 	}
 
 	void loadMap(File file) {
