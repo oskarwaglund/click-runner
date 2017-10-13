@@ -13,10 +13,11 @@ public class Drone extends Unit{
 	private static final int VISION_RANGE = 100;
 	
 	private static final int ATTACK_RANGE = 10;
-	private static final int ATTACK_DURATION = 1000/Clock.FRAME_LENGTH; //1 second
+	private static final int ATTACK_DURATION = 1000/Clock.FRAME_LENGTH; 
 	private static final int DAMAGE_FRAME = 10;
 	private static final int DAMAGE = 3;
-	private static final int DEATH_TIME = 2000/Clock.FRAME_LENGTH; //2 seconds
+	private static final int SPLASH = 0;
+	private static final int DEATH_TIME = 2000/Clock.FRAME_LENGTH; 
 	
 	public Drone(double x, double y) {
 		super(x, y);
@@ -59,6 +60,11 @@ public class Drone extends Unit{
 	int damage() {
 		return DAMAGE;
 	}
+	
+	@Override
+	public int splash() {
+		return SPLASH;
+	}
 
 	@Override
 	public int visionRange() {
@@ -68,6 +74,16 @@ public class Drone extends Unit{
 	@Override
 	int deathTime() {
 		return DEATH_TIME;
+	}
+	
+	@Override
+	void attackFunction(Unit u) {
+		u.hp -= DAMAGE;
+	}
+	
+	@Override
+	void attackTargetAcquired() {
+		
 	}
 
 	public void paintUnit(Graphics g) {

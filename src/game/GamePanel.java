@@ -28,6 +28,7 @@ import abstracts.Point;
 import abstracts.Selection;
 import map.Colors;
 import map.Wall;
+import units.Bomber;
 import units.Drone;
 import units.Shooter;
 import units.Unit;
@@ -71,6 +72,8 @@ public class GamePanel extends JPanel implements MouseInputListener, KeyListener
 					new Shooter(200 + (i / 10) * 10, 800 + (i % 10) * 10, 3));
 		}
 		
+		addUnit(new Bomber(200, 190, 1));
+		
 		selection = null;
 		walls = new ArrayList<>();
 		loadMap();
@@ -107,8 +110,9 @@ public class GamePanel extends JPanel implements MouseInputListener, KeyListener
 			}
 		}
 
-		for (Unit u : units) {
-			u.step();
+		KDTree allUnitsTree = new KDTree(units, walls);
+		for (Unit unit : units) {
+			unit.step(unit.splash() > 0 ? allUnitsTree : null);
 		}
 
 		for (int i = units.size() - 1; i >= 0; i--) {

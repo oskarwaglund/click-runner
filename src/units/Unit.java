@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Set;
 import java.util.TreeSet;
 
+import abstracts.KDTree;
 import abstracts.Mesh;
 import abstracts.Node;
 import abstracts.Point;
@@ -18,9 +19,8 @@ public abstract class Unit {
 
 	protected double x, y;
 
-	private int hp;
+	protected int hp;
 	protected int deadCounter;
-
 	protected int team;
 
 	protected int attackCounter;
@@ -44,8 +44,13 @@ public abstract class Unit {
 
 	abstract int damage();
 
+	public abstract int splash();
+
 	abstract int deathTime();
 
+	abstract void attackFunction(Unit u);
+	abstract void attackTargetAcquired();
+	
 	public abstract int visionRange();
 
 	protected abstract void paintUnit(Graphics g);
@@ -112,7 +117,7 @@ public abstract class Unit {
 					break;
 				}
 			}
-			if(!collides) {
+			if (!collides) {
 				goal = new Node(x, y);
 			} else {
 				tries++;
@@ -215,16 +220,24 @@ public abstract class Unit {
 		}
 	}
 
-	public void step() {
+	public void step(KDTree unitTree) {
 		if (isDead()) {
 			deadCounter++;
 			return;
+		} else if(attackTarget != null && attackCounter < 0) {
+			attackCounter = 0;
+		} else if (attackCounter >= 0) {
+			attackCounter++;
+			if(attackCounter >= attackDuration()) {
+				attackCounter = (attackTarget == null || attackTarget.isDead()) ? -1 : 0;
+			}
 		}
+
 		if (attackTarget != null) {
 			if (attackTarget.isDead()) {
 				attackTarget = null;
 			} else {
-				attack();
+				attack(unitTree);
 			}
 		} else if (path.size() > 0) {
 			Point p = path.getFirst();
@@ -240,7 +253,7 @@ public abstract class Unit {
 		}
 	}
 
-	public void attack() {
+	public void attack(KDTree unitTree) {
 		double distance = distanceTo(attackTarget);
 		if (distance <= attackRange()) {
 			if (attackCounter < 0) {
@@ -251,24 +264,27 @@ public abstract class Unit {
 			y += (attackTarget.y - y) / distance * speed();
 		}
 		if (attackCounter >= 0) {
-			attackCounter++;
 			if (attackCounter == damageFrame()) {
-				attackTarget.hp -= damage();
+				if (splash() == 0) {
+					attackFunction(attackTarget);
+				} else {
+					for (Unit u : unitTree.getUnitsInRange(attackTarget, splash())) {
+						attackFunction(u);
+					}
+				}
 			}
-			if (attackCounter >= attackDuration()) {
-				attackCounter = -1;
-			}
+
 		}
 	}
 
 	public double distanceTo(Unit u) {
 		return Math.hypot(u.x - x, u.y - y);
 	}
-	
+
 	public double squaredDistanceTo(Unit u) {
 		double dX = x - u.x;
 		double dY = y - u.y;
-		return dX*dX + dY*dY; 
+		return dX * dX + dY * dY;
 	}
 
 	public boolean sees(Unit u, ArrayList<Wall> walls) {
@@ -287,7 +303,7 @@ public abstract class Unit {
 					Math.max(0, 255 - 255 * deadCounter / deathTime()));
 		} else {
 			paintUnit(g);
-			if(selected) {
+			if (selected) {
 				paintPath(g);
 				paintHealthBar(g);
 			}
@@ -342,7 +358,7 @@ public abstract class Unit {
 	public void setAttackTarget(Unit attackTarget) {
 		if (attackTarget != null) {
 			this.attackTarget = attackTarget;
-			attackCounter = -1;
+			attackTargetAcquired();
 		}
 	}
 

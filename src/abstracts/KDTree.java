@@ -24,18 +24,18 @@ public class KDTree {
 			return (int) Math.signum(u1.getY() - u2.getY());
 		}
 	}
-	
+
 	private static abstract class GetUnitValueFunction {
 		abstract double getValue(Unit u);
 	}
-	
+
 	private static class GetX extends GetUnitValueFunction {
 		@Override
 		double getValue(Unit u) {
 			return u.getX();
 		}
 	}
-	
+
 	private static class GetY extends GetUnitValueFunction {
 		double getValue(Unit u) {
 			return u.getY();
@@ -44,21 +44,29 @@ public class KDTree {
 
 	Node root;
 	Unit closestUnit;
+	ArrayList<Unit> unitsInRange;
+
 	double bestDistance;
 	ArrayList<Wall> walls;
-	
+
+	enum SearchType {
+		CLOSEST, IN_RANGE
+	}
+
+	SearchType searchType;
+
 	static XComparator xC = new XComparator();
 	static YComparator yC = new YComparator();
 
 	static GetUnitValueFunction xF = new GetX();
 	static GetUnitValueFunction yF = new GetY();
-	
+
 	private class Node {
 		Node lower, upper;
 		int depth;
 		double splitValue;
 		Unit unit;
-		
+
 		void insert(List<Unit> units, int depth) {
 			this.depth = depth;
 			switch (units.size()) {
@@ -78,12 +86,12 @@ public class KDTree {
 					f = yF;
 				}
 				units.sort(c);
-				splitValue = f.getValue(units.get(units.size()/2));
+				splitValue = f.getValue(units.get(units.size() / 2));
 				lower = new Node();
 				upper = new Node();
 
 				int splitIndex = 0;
-				while(f.getValue(units.get(splitIndex)) <= splitValue && splitIndex < units.size()-1) {
+				while (f.getValue(units.get(splitIndex)) <= splitValue && splitIndex < units.size() - 1) {
 					splitIndex++;
 				}
 				lower.insert(units.subList(0, splitIndex), depth + 1);
@@ -91,28 +99,28 @@ public class KDTree {
 			}
 		}
 
-		void getClosestEnemy(Unit u) {
+		void query(Unit u) {
 			if (isLeaf()) {
 				checkBetter(u);
 				return;
 			}
 
 			GetUnitValueFunction f;
-			if(depth % 2 == 0) {
+			if (depth % 2 == 0) {
 				f = xF;
 			} else {
 				f = yF;
 			}
-			
-			if(f.getValue(u) <= splitValue) {
-				lower.getClosestEnemy(u);
-				if(f.getValue(u) + bestDistance >= splitValue) {
-					upper.getClosestEnemy(u);
+
+			if (f.getValue(u) <= splitValue) {
+				lower.query(u);
+				if (f.getValue(u) + bestDistance >= splitValue) {
+					upper.query(u);
 				}
 			} else {
-				upper.getClosestEnemy(u);
-				if(f.getValue(u) - bestDistance <= splitValue) {
-					lower.getClosestEnemy(u);
+				upper.query(u);
+				if (f.getValue(u) - bestDistance <= splitValue) {
+					lower.query(u);
 				}
 			}
 		}
@@ -120,10 +128,20 @@ public class KDTree {
 		void checkBetter(Unit u) {
 			if (unit != null) {
 				double distance = u.distanceTo(unit);
-				if (!unit.isDead() && distance <= bestDistance && u.sees(unit, KDTree.this.walls)) {
-					bestDistance = distance;
-					closestUnit = unit;
+				switch (searchType) {
+				case CLOSEST:
+					if (!unit.isDead() && distance <= bestDistance && u.sees(unit, KDTree.this.walls)) {
+						bestDistance = distance;
+						closestUnit = unit;
+					}
+					break;
+				case IN_RANGE:
+					if(distance <= bestDistance && u.sees(unit, KDTree.this.walls)) {
+						unitsInRange.add(unit);
+					}
+					break;
 				}
+
 			}
 		}
 
@@ -137,7 +155,7 @@ public class KDTree {
 			if (depth % 2 == 0) {
 				g.drawLine((int) splitValue, top, (int) splitValue, down);
 				if (lower != null) {
-					lower.paint(g, l, (int)splitValue, down, top);
+					lower.paint(g, l, (int) splitValue, down, top);
 				}
 				if (upper != null) {
 					upper.paint(g, (int) splitValue, r, down, top);
@@ -148,7 +166,7 @@ public class KDTree {
 					lower.paint(g, l, r, down, (int) splitValue);
 				}
 				if (upper != null) {
-					upper.paint(g, l, r, (int)splitValue, top);
+					upper.paint(g, l, r, (int) splitValue, top);
 				}
 			}
 		}
@@ -167,10 +185,19 @@ public class KDTree {
 	}
 
 	public Unit getClosestEnemy(Unit unit) {
+		searchType = SearchType.CLOSEST;
 		closestUnit = null;
 		bestDistance = unit.visionRange();
-		root.getClosestEnemy(unit);
+		root.query(unit);
 		return closestUnit;
+	}
+
+	public ArrayList<Unit> getUnitsInRange(Unit unit, double range) {
+		searchType = SearchType.IN_RANGE;
+		unitsInRange = new ArrayList<>();
+		bestDistance = range;
+		root.query(unit);
+		return unitsInRange;
 	}
 
 }

@@ -17,6 +17,7 @@ public class Shooter extends Unit{
 	private static final int ATTACK_DURATION = 1000/Clock.FRAME_LENGTH;
 	private static final int DAMAGE_FRAME = 10;
 	private static final int DAMAGE = 3;
+	private static final int SPLASH = 0;
 	private static final int DEATH_TIME = 2000/Clock.FRAME_LENGTH;
 	
 	public Shooter(double x, double y) {
@@ -60,6 +61,11 @@ public class Shooter extends Unit{
 	int damage() {
 		return DAMAGE;
 	}
+	
+	@Override
+	public int splash() {
+		return SPLASH;
+	}
 
 	@Override
 	public int visionRange() {
@@ -69,6 +75,16 @@ public class Shooter extends Unit{
 	@Override
 	int deathTime() {
 		return DEATH_TIME;
+	}
+	
+	@Override
+	void attackFunction(Unit u) {
+		u.hp -= DAMAGE;
+	}
+	
+	@Override
+	void attackTargetAcquired() {
+	
 	}
 
 	@Override
