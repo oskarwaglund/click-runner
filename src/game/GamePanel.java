@@ -1,4 +1,5 @@
 package game;
+
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
@@ -11,6 +12,9 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
@@ -37,14 +41,14 @@ public class GamePanel extends JPanel implements MouseInputListener, KeyListener
 
 	ArrayList<Unit> units;
 	ArrayList<Unit> selectedUnits;
-
+	Set<Integer> teams;
 	Selection selection;
 
 	boolean showMesh;
 
 	long logicLength;
 	long paintLength;
-	
+
 	public GamePanel() {
 		setBackground(Colors.BACKGROUND);
 		addMouseListener(this);
@@ -52,12 +56,13 @@ public class GamePanel extends JPanel implements MouseInputListener, KeyListener
 
 		units = new ArrayList<>();
 		selectedUnits = new ArrayList<>();
+		teams = new TreeSet<>();
 		for (int i = 0; i < 100; i++) {
-			units.add(new Drone(200 + (i/10) * 10, 200 + (i%10) * 10, 1));
+			addUnit(new Drone(200 + (i / 10) * 10, 200 + (i % 10) * 10, 1));
 		}
-		
+
 		for (int i = 0; i < 100; i++) {
-			units.add(new Shooter(200 + (i/10) * 10, 500 + (i%10) * 10, 2));
+			addUnit(new Shooter(200 + (i / 10) * 10, 500 + (i % 10) * 10, 2));
 		}
 
 		selection = null;
@@ -81,36 +86,18 @@ public class GamePanel extends JPanel implements MouseInputListener, KeyListener
 		long mid = System.currentTimeMillis();
 		repaint();
 		long stop = System.currentTimeMillis();
-		
+
 		logicLength = mid - start;
 		paintLength = stop - mid;
 	}
 
 	void stepUnits() {
-		boolean useKD = false;
-		if(useKD) {
-			tree = new KDTree(units);
-			for(Unit u: units) {
-				if(u.getAttackTarget() == null) {
+		for (int team : teams) {
+			tree = new KDTree(
+					units.stream().filter(u -> u.getTeam() != team && !u.isDead()).collect(Collectors.toList()));
+			for (Unit u : units.stream().filter(u -> u.getTeam() == team && !u.isDead()).collect(Collectors.toList())) {
+				if (u.getAttackTarget() == null) {
 					u.setAttackTarget(tree.getClosestEnemy(u));
-				}
-			}
-		} else {
-			for (Unit u1 : units) {
-				if(u1.getAttackTarget() == null) {
-					Unit target = null;
-					double closestDistance = u1.visionRange()*u1.visionRange();
-					for (Unit u2 : units) {
-						if(u1.getTeam() == u2.getTeam() || u2.isDead() || !u1.sees(u2, walls)) {
-							continue;
-						}
-						double distance = u1.squaredDistanceTo(u2);
-						if(distance <= closestDistance) {
-							closestDistance = distance;
-							target = u2;
-						}
-					}
-					u1.setAttackTarget(target);
 				}
 			}
 		}
@@ -118,12 +105,17 @@ public class GamePanel extends JPanel implements MouseInputListener, KeyListener
 		for (Unit u : units) {
 			u.step();
 		}
-		
-		for(int i = units.size() - 1; i >= 0; i--) {
-			if(units.get(i).remove()) {
+
+		for (int i = units.size() - 1; i >= 0; i--) {
+			if (units.get(i).remove()) {
 				units.remove(i);
 			}
 		}
+	}
+
+	void addUnit(Unit u) {
+		units.add(u);
+		teams.add(u.getTeam());
 	}
 
 	public void paintComponent(Graphics g) {
@@ -131,7 +123,7 @@ public class GamePanel extends JPanel implements MouseInputListener, KeyListener
 		for (Wall w : walls) {
 			w.paint(g);
 		}
-		
+
 		if (showMesh) {
 			mesh.paint(g);
 		}
@@ -142,17 +134,10 @@ public class GamePanel extends JPanel implements MouseInputListener, KeyListener
 
 		int x = 10;
 		int y = 10;
-		String[] strings = new String[] { 
-				"***Controls***", 
-				"M:            Toggle mesh", 
-				"Left click:   Select units",
-				"Right click:  Set path", 
-				"", 
-				"***Metrics***", 
-				"Mesh points:  " + mesh.getPoints().size(),
-				"Connections:  " + mesh.getConnections().size(),
-				"Logic length: " + logicLength + " ms",
-				"Paint length: " + paintLength + " ms"};
+		String[] strings = new String[] { "***Controls***", "M:            Toggle mesh", "Left click:   Select units",
+				"Right click:  Set path", "", "***Metrics***", "Mesh points:  " + mesh.getPoints().size(),
+				"Connections:  " + mesh.getConnections().size(), "Logic length: " + logicLength + " ms",
+				"Paint length: " + paintLength + " ms" };
 
 		g.setColor(Colors.TEXT);
 		g.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
@@ -161,11 +146,11 @@ public class GamePanel extends JPanel implements MouseInputListener, KeyListener
 			y += g.getFontMetrics().getHeight();
 		}
 
-		if(selection != null) {
+		if (selection != null) {
 			selection.paint(g);
 		}
-		
-		if(tree != null) {
+
+		if (tree != null) {
 			tree.paint(g);
 		}
 	}
@@ -207,7 +192,7 @@ public class GamePanel extends JPanel implements MouseInputListener, KeyListener
 		}
 		selectedUnits.clear();
 		for (Unit u : units) {
-			if (selection.contains((int)u.getX(), (int)u.getY())) {
+			if (selection.contains((int) u.getX(), (int) u.getY())) {
 				selectedUnits.add(u);
 			}
 		}

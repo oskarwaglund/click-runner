@@ -1,10 +1,8 @@
 package units;
 
-import java.awt.Color;
 import java.awt.Graphics;
 
 import abstracts.Clock;
-import abstracts.Point;
 import map.Colors;
 
 public class Shooter extends Unit{
